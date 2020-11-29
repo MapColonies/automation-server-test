@@ -1,0 +1,18 @@
+{
+  "fileName": "rs",
+  "sizeEst": 2,
+  "tilesEst": 51,
+  "directoryName": "rsrs",
+  "exportedLayers": [
+    {
+      "exportType": "raster",
+      "url": "http://10.28.11.125/blue_m_flat2d-v001/wms?SERVICE=WMS&LAYERS=[blue_m_flat2d-v001]:1002&TILED=true"
+    }
+  ],
+  "bbox": [
+    34.97348584069924,
+    31.807417142121864,
+    34.97845515081091,
+    31.811133321857543
+  ]
+}
