@@ -123,8 +123,8 @@ def validate_geo_package(uri):
 
     if not os.path.exists(config.PACKAGE_OUTPUT_DIR):
         _logger.error(
-            "Output directory not exist [%s]- validate mapping and directory on config" % config.PACKAGE_OUTPUT_DIR)
-        raise Exception("Output directory: [%s] not found ! validate config or mapping" % config.PACKAGE_OUTPUT_DIR)
+            "Output directory not exist [%s]- validate mapping and directory on config" % (config.PACKAGE_OUTPUT_DIR))
+        raise Exception("Output directory: [%s] not found ! validate config \ mapping" % (config.PACKAGE_OUTPUT_DIR))
 
         if not os.path.exists(uri):
             _logger.error('Package [%s] not exist! file validation failed' % (resp['fileURI'].split('/')[-1:]))
