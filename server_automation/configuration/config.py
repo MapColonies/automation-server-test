@@ -15,12 +15,11 @@ class ResponseCode(enum.Enum):
 
 
 ###########      error massages     ##########
-BOX_LIMIT_ERROR = 'ERR_BBOX_AREA_TOO_LARGE' ##
+BOX_LIMIT_ERROR = 'ERR_BBOX_AREA_TOO_LARGE'
 ##############################################
 
 
 PACKAGE_EXT = 'GPKG'
-
 
 ######################        Environment         #########################
 EXPORTER_PORT = get_environment_variable('EXPORTER_PORT', "8081")
@@ -36,7 +35,6 @@ EXPORT_TRIGGER_URL = ':'.join([BASE_SERVICES_URL, EXPORTER_PORT])
 EXPORT_STORAGE_URL = ':'.join([BASE_SERVICES_URL, STORAGE_PORT])
 DOWNLOAD_STORAGE_URL = ':'.join([BASE_SERVICES_URL, DOWNLOAD_PORT])
 
-
 ###############  API's sub urls  #############
 EXPORT_GEOPACKAGE_API = "exportGeopackage"
 STATUSES_API = "statuses"
@@ -50,18 +48,7 @@ EXPORT_STATUS_COMPLITED = "Completed"
 EXPORT_STATUS_PENDING = "Pending"
 EXPORT_STATUS_FAILED = "Failed"
 
-# def combine_url(base, *args) -> str:
-#     """
-#     This method concat / combine and build new url from list parts of url
-#     :param base : this is the base relative uri
-#     :param *args : sub directories of the url
-#     """
-#     for i in range(len(args)):
-#         base = posixpath.join(base, args[i])
-#     return base
-
-
-EXPORT_REQUEST_PATH = "/home/ronenk1/dev/server/samples/request_short.json"
+# EXPORT_REQUEST_PATH = "/home/ronenk1/dev/server/samples/request_short.json"
 
 ################################## timings ###################################
 MAX_EXPORT_RUNNING_TIME = 60 * get_environment_variable('MAX_EXPORT_RUNNING_TIME', 10)  # min
@@ -71,7 +58,5 @@ MAX_EXPORT_RUNNING_TIME = 60 * get_environment_variable('MAX_EXPORT_RUNNING_TIME
 
 PACKAGE_OUTPUT_DIR = get_environment_variable('OUTPUT_EXPORT_PATH', '/home/ronenk1/dev/output')
 
-
 EXPORT_DOWNLOAD_DIR_NAME = get_environment_variable('TEST_DIR_NAME', 'test_dir')
 EXPORT_DOWNLOAD_FILE_NAME = get_environment_variable('TEST_PKG_NAME', 'exporter_tests')
-

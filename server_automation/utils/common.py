@@ -4,6 +4,7 @@ import re
 import json
 import hashlib
 import logging
+import uuid
 
 _log = logging.getLogger('server.common')
 
@@ -138,3 +139,9 @@ def bytes_to_str(string):
         return None
 
     return string.decode('utf-8')
+
+def generate_uuid():
+    """
+    create uuid string with uuid python's libary
+    """
+    return str(uuid.uuid4())

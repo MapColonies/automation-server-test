@@ -4,19 +4,25 @@
 import pytest
 import os
 import json
-os.environ['DEBUG_LOGS'] = 'True'
+import logging
+
+# os.environ['DEBUG_LOGS'] = 'True'
 from server_automation.tests import request_sampels
 from server_automation.functions import executors as exc
 from server_automation.configuration import config
 from server_automation.utils import common
 
+_log = logging.getLogger('server.exporter_tool_tests')
 
 def test_export_geopackage():
     """ Test case: Export data as valid geoPackages format
+
         Validate epic 4 – server side – requirement 2
+
         This test validates that geoPackage includes all tiles and their relative metadata.
     """
 
+    _log.info('Start running test: %s', test_export_geopackage.__name__)
     # check and load request json
     request = request_sampels.get_request_sample('et_req_2')
     assert request
@@ -47,10 +53,21 @@ def test_export_geopackage():
     assert is_valid_package, print('package is corrupted')
 
     exc.delete_requests(config.EXPORT_STORAGE_URL, [content['uuid']])
+    _log.info('Finish running test: %s', test_export_geopackage.__name__)
 
 
 def test_box_size_limit():
-    """This test validate that exporter trigger is limit the bbox size according to configurable param"""
+    """ Test case: Export according restricted region size of geoPackage
+
+        Validate epic 4 – server side – requirement 3
+
+        Test creation of geoPackage data, bounded by region size configuration value.
+        Default configuration parameter (100X100 according to epic).
+        Fail if required region size is greater than this value.
+    """
+
+    _log.info('Start running test: %s', test_export_geopackage.__name__)
+
     request = request_sampels.get_request_by_box_size(request_sampels.box_size.Big)
     assert request
     s_code, content = exc.send_export_request(request)
@@ -68,12 +85,26 @@ def test_box_size_limit():
     res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
     assert res, print('Error while exporting package')
     exc.delete_requests(config.EXPORT_STORAGE_URL, [content['uuid']])
+    _log.info('Finish running test: %s', test_export_geopackage.__name__)
 
+
+# def test_delete_old_packages():
+#
+#     # creating file to test
+#     output_dir = config.PACKAGE_OUTPUT_DIR
+#     full_path = os.path.join(output_dir, 'deletion_test', 'delete_test.gpkg')
+#     f = open(full_path, 'w')
+#
+#
+#     print("On Developing")
+#     pass
 
 def test_export_on_storage():
+    """ Test case: Package created on shared folder
+        Validate epic 4 – server side – requirement 5
+        This test validates that geoPackage that was created on storage can be downloaded locally and valid as original
     """
-    This test validate that package was exported into shared folder properly
-    """
+    _log.info('Start running test: %s', test_export_geopackage.__name__)
 
     # loading request
     request = request_sampels.get_request_by_box_size(request_sampels.box_size.Sanity)
@@ -84,7 +115,7 @@ def test_export_on_storage():
 
     # start trigger export
     s_code, content = exc.send_export_request(json.dumps(request))
-    assert s_code == config.ResponseCode.Ok.value, ('Failed with error code %d - %s' % ( s_code, content))
+    assert s_code == config.ResponseCode.Ok.value, ('Failed with error code %d - %s' % (s_code, content))
 
     # check exporting process and wait till end with results
     try:
@@ -99,24 +130,44 @@ def test_export_on_storage():
     assert os.path.exists(pkg_url), ("File not exist on storage %s" % pkg_url)
 
     exc.delete_requests(config.EXPORT_STORAGE_URL, [content['uuid']])
+    _log.info('Finish running test: %s', test_export_geopackage.__name__)
 
 
 def test_download_package():
+    """ Test case: Download locally package from shared storage
+
+        Validate epic 4 – server side – requirement 5
+
+        This test validates that geoPackage that was created on storage can be downloaded locally and valid as original
+    """
+    _log.info('Start running test: %s', test_export_geopackage.__name__)
+
     #  validate exported file exist on storage from previous test - test_export_on_storage
     pkg_url = common.combine_url(config.PACKAGE_OUTPUT_DIR, config.EXPORT_DOWNLOAD_DIR_NAME,
                                  ".".join([config.EXPORT_DOWNLOAD_FILE_NAME, config.PACKAGE_EXT]))
     assert os.path.exists(pkg_url), print("File not exist on storage %s" % pkg_url)
 
     #  send and receive download file request
-    s_code, downloaded_data = exc.send_download_request(config.EXPORT_DOWNLOAD_DIR_NAME, config.EXPORT_DOWNLOAD_FILE_NAME)
+    s_code, downloaded_data = exc.send_download_request(config.EXPORT_DOWNLOAD_DIR_NAME,
+                                                        config.EXPORT_DOWNLOAD_FILE_NAME)
     assert s_code == config.ResponseCode.Ok.value, ("failed download with status code %d" % s_code)
 
     #  compare downloaded and exported files by hashing
     orig_exported = exc.common.load_file_as_bytearray(pkg_url)  # bytes array
-    assert common.generate_unique_fingerprint(orig_exported) == common.generate_unique_fingerprint(downloaded_data), ("download package not equal to exported package")
+    assert common.generate_unique_fingerprint(orig_exported) == common.generate_unique_fingerprint(downloaded_data), (
+        "download package not equal to exported package")
+
+    _log.info('Finish running test: %s', test_export_geopackage.__name__)
 
 
+# example for future implementation of async tests
+# @pytest.mark.asyncio
+# async def test_app(create_x, auth):
+#     api_client, x_id = create_x
+#     resp = await api_client.get(f'my_res/{x_id}', headers=auth)
+#     assert resp.status == web.HTTPOk.status_code
 
+# test_delete_old_packages()
 # test_export_on_storage()
 # test_download_package()
 # test_export_geopackage()

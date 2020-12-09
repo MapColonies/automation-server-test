@@ -33,6 +33,28 @@ def delete_by_uuid(url, uuid):
     resp = conn.send_post_request(full_url, uuid)
     return resp
 
+def create_testing_status(url, directory_name, fileName):
+    body = {
+        'userId': 'deletion_test',
+        'fileName': fileName.split('.')[0],
+        'directoryName': directory_name,
+        'fileURI': common.combine_url(config.DOWNLOAD_STORAGE_URL, config.DOWNLOAD_API, directory_name, fileName),
+        'progress': 100,
+        'status': config.EXPORT_STATUS_COMPLITED,
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+                125.6,
+                10.1
+            ]
+        },
+        'estimatedFileSize': 1500,
+        'realFileSize': 1500,
+        'creationTime': 222,
+
+    }
+
+
 
 # def clear_all_tasks(url):
 #     """

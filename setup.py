@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="mc-server-automation",  # geopackage_validator
+    name="mc-server-automation",
     author="MC",
     description="Map colonies automation infrastructure",
     long_description=long_description,
@@ -15,9 +15,9 @@ setuptools.setup(
     url="https://github.com/MapColonies/automation-server-test.git",
     packages=setuptools.find_packages(),
     install_requires=requirements,
-    version='0.0.2',
-    # use_scm_version=True,
-    # setup_requires=['setuptools_scm'],
+    # version='0.0.2',
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

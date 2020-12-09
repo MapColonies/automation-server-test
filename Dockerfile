@@ -6,6 +6,10 @@ WORKDIR /source_code
 
 COPY . .
 
+ARG VERSION=0.0.0
+ENV VERSION=$VERSION
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=$VERSION
+
 RUN apk update -q --no-cache \
     && apk add -q --no-cache python3 py3-pip
 

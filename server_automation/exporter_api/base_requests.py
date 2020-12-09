@@ -22,11 +22,12 @@ def send_post_request(url, body, header=None):
 def send_get_request(url, header=None):
     common.url_validator(url)
     if not header:
-        header = {'content-type': 'application/json', "accept": "*/*"}
+        # header = {'content-type': 'application/json', "accept": "*/*"}
         try:
             resp = requests.get(url)
             _log.debug("response code: %d" % resp.status_code)
-            _log.debug("response message: %s" % resp.text)
+            _log.debug("response message: %s" % resp.content)
+            # _log.debug("response message: %s" % resp.text)
             return resp
 
         except Exception as e:

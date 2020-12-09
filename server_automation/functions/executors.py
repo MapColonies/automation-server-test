@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import time
+import datetime
 
 _logger = logging.getLogger("server.exporter.executors")
 
@@ -93,7 +94,7 @@ def exporter_follower(url, uuid):
 
         current_time = time.time()
         running = not (progress == 100 and content['status'] == config.EXPORT_STATUS_COMPLITED) and current_time < t_end
-        _logger.debug(
+        _logger.info(
             'Received from task(uuid): %s ,with status code: %d and progress: %d' % (uuid, status_code, progress))
 
         if current_time > t_end:
@@ -149,3 +150,34 @@ def clear_all_tasks(url):
         uuids = [stat['taskId'] for stat in statuses]
         resp = su.delete_by_uuid(url, uuids)
     return resp
+
+
+def create_testing_status(url, directory_name, fileName):
+    current_time = datetime.datetime.utcnow()
+    current_hour = current_time.hour
+
+    utc_curr = current_time.utcnow().strftime('%Y-%m-%d %H:%M:%SZ')
+    current_hour = utc_curr.hour
+
+
+    body = {
+        'userId': 'deletion_test',
+        'fileName': fileName.split('.')[0],
+        'directoryName': directory_name,
+        'fileURI': common.combine_url(config.DOWNLOAD_STORAGE_URL, config.DOWNLOAD_API, directory_name, fileName),
+        'progress': 100,
+        'status': config.EXPORT_STATUS_COMPLITED,
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+                125.6,
+                10.1
+            ]
+        },
+        'estimatedFileSize': 1500,
+        'realFileSize': 1500,
+        'creationTime': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%SZ'),
+        'updatedTime': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%SZ'),
+
+
+    }
