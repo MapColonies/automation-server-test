@@ -15,7 +15,7 @@ setuptools.setup(
     url="https://github.com/MapColonies/automation-server-test.git",
     packages=setuptools.find_packages(),
     install_requires=requirements,
-    # version='0.0.2',
+    # version='0.0.2', # for hard coded version
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     classifiers=[
