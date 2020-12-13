@@ -13,6 +13,7 @@ _et_req_1 = {
     "fileName": "r_regular",
     "sizeEst": 2,
     "tilesEst": 51,
+    "maxZoom": 18,
     "directoryName": "e_tests",
     "exportedLayers": [
         {
@@ -32,6 +33,7 @@ _et_req_2 = {
     "fileName": "r_short",
     "sizeEst": 30,
     "tilesEst": 10,
+    "maxZoom": 18,
     "directoryName": "e_tests",
     "exportedLayers": [
         {
@@ -52,6 +54,7 @@ _et_req_3 = {
     "fileName": "dynamic_box",
     "sizeEst": 30,
     "tilesEst": 10,
+    "maxZoom": 18,
     "directoryName": "size_limit_test",
     "exportedLayers": [
         {

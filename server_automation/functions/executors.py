@@ -10,7 +10,7 @@ import os
 import time
 import datetime
 
-_logger = logging.getLogger("server.exporter.executors")
+_logger = logging.getLogger("server.executors")
 
 
 def send_export_request(request_dict, request_path=None):
@@ -144,7 +144,7 @@ def clear_all_tasks(url):
     """
     This method clear db from all tasks, return None if no task on db
     """
-    uuids = None
+    resp = ['db was empty of task']
     statuses = json.loads(su.get_all_statuses(url).text)
     if len(statuses):
         uuids = [stat['taskId'] for stat in statuses]

@@ -118,11 +118,12 @@ def test_export_on_storage():
     assert s_code == config.ResponseCode.Ok.value, ('Failed with error code %d - %s' % (s_code, content))
 
     # check exporting process and wait till end with results
+    res = None
     try:
         res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
     except Exception as e:
         err = str(e)
-    assert res, ('Error while exporting package %s' % err)
+    assert res, ('Error while exporting package %s' % (err))
 
     # validate file places on storage
     file_location = res['fileURI']
