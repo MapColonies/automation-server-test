@@ -1,7 +1,6 @@
 from . import base_requests as conn
 from server_automation.utils import common
 from server_automation.configuration import config
-import json
 
 
 def get_all_statuses(url):
@@ -33,6 +32,7 @@ def delete_by_uuid(url, uuid):
     resp = conn.send_post_request(full_url, uuid)
     return resp
 
+
 def create_testing_status(url, directory_name, fileName):
     body = {
         'userId': 'deletion_test',
@@ -53,8 +53,7 @@ def create_testing_status(url, directory_name, fileName):
         'creationTime': 222,
 
     }
-
-
+    return body
 
 # def clear_all_tasks(url):
 #     """

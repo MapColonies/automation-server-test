@@ -2,7 +2,7 @@ from server_automation.exporter_api import storage_utils as su
 from server_automation.exporter_api import base_requests as br
 from server_automation.utils import common
 from server_automation.configuration import config
-from geopackage_tools.infra import db_conn as db
+# from geopackage_tools.infra import db_conn as db
 from geopackage_tools.validators import validator as gpv
 import json
 import logging
@@ -127,9 +127,10 @@ def validate_geo_package(uri):
             "Output directory not exist [%s]- validate mapping and directory on config" % (config.PACKAGE_OUTPUT_DIR))
         raise Exception("Output directory: [%s] not found ! validate config \ mapping" % (config.PACKAGE_OUTPUT_DIR))
 
-        if not os.path.exists(uri):
-            _logger.error('Package [%s] not exist! file validation failed' % (resp['fileURI'].split('/')[-1:]))
-            return False
+    # TODO fix after environment will be fixed
+    # if not os.path.exists(uri):
+    #     _logger.error('Package [%s] not exist! file validation failed' % (resp['fileURI'].split('/')[-1:]))
+    #     return False
 
     res = gpv.aseert_package(uri)
     return res
@@ -184,8 +185,7 @@ def create_testing_status(url, directory_name, fileName):
                     [
                         34.8119380171075,
                         31.9642696217735
-                    ],
-                    [
+                    ], [
                         34.8119380171075,
                         31.9547503375918
                     ]
