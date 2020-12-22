@@ -8,7 +8,7 @@ import json
 import logging
 import os
 import time
-import datetime
+from datetime import datetime, timedelta
 
 _logger = logging.getLogger("server.executors")
 
@@ -153,14 +153,12 @@ def clear_all_tasks(url):
 
 
 def create_testing_status(url, directory_name, fileName):
-    current_time = datetime.datetime.utcnow()
-    current_hour = current_time.hour
-
+    current_time = datetime.utcnow()
     utc_curr = current_time.utcnow().strftime('%Y-%m-%d %H:%M:%SZ')
-    current_hour = utc_curr.hour
-
+    utc_expierd = (current_time + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%SZ')
 
     body = {
+        'taskId': common.generate_uuid(),
         'userId': 'deletion_test',
         'fileName': fileName.split('.')[0],
         'directoryName': directory_name,
@@ -168,16 +166,46 @@ def create_testing_status(url, directory_name, fileName):
         'progress': 100,
         'status': config.EXPORT_STATUS_COMPLITED,
         "geometry": {
-            "type": "Point",
+            "type": "Polygon",
             "coordinates": [
-                125.6,
-                10.1
+                [
+                    [
+                        34.8119380171075,
+                        31.9547503375918
+                    ],
+                    [
+                        34.822372617076,
+                        31.9547503375918
+                    ],
+                    [
+                        34.822372617076,
+                        31.9642696217735
+                    ],
+                    [
+                        34.8119380171075,
+                        31.9642696217735
+                    ],
+                    [
+                        34.8119380171075,
+                        31.9547503375918
+                    ]
+                ]
             ]
         },
         'estimatedFileSize': 1500,
         'realFileSize': 1500,
-        'creationTime': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%SZ'),
-        'updatedTime': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%SZ'),
-
+        'creationTime': utc_curr,
+        'updatedTime': utc_curr,
+        'expirationTime': utc_expierd,
 
     }
+
+    resp = br.send_post_request(common.combine_url(config.EXPORT_STORAGE_URL, config.STATUSES_API), body)
+    if resp.status_code == config.ResponseCode.Ok.value:
+        _logger.info('Created new task with uuid: %s', (body['taskId']))
+        _logger.debug('Task was registered as : body %s', body)
+        return resp, body['taskId']
+    else:
+        _logger.error('Error while trying create new task with - status: %d | error: %s', resp.status_code, resp.content)
+        return resp, "None"
+

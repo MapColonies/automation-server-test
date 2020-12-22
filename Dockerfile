@@ -2,6 +2,7 @@ FROM python:3.6-alpine3.12
 RUN addgroup -S app && adduser -S app -G app
 
 RUN mkdir /opt/output
+RUN mkdir /opt/logs
 WORKDIR /source_code
 
 ARG VERSION=0.0.0

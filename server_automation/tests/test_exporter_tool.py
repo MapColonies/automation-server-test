@@ -14,6 +14,7 @@ from server_automation.utils import common
 
 _log = logging.getLogger('server.exporter_tool_tests')
 
+
 def test_export_geopackage():
     """ Test case: Export data as valid geoPackages format
 
@@ -82,22 +83,39 @@ def test_box_size_limit():
     request = request_sampels.get_request_by_box_size(request_sampels.box_size.Sanity)
     assert request
     s_code, content = exc.send_export_request(request)
-    res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
-    assert res, print('Error while exporting package')
+    try:
+        res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+    except Exception as e:
+        res = None
+    assert res, ('Error while exporting package - exporter follow stage %s', str(e) )
     exc.delete_requests(config.EXPORT_STORAGE_URL, [content['uuid']])
     _log.info('Finish running test: %s', test_export_geopackage.__name__)
 
 
-# def test_delete_old_packages():
-#
-#     # creating file to test
-#     output_dir = config.PACKAGE_OUTPUT_DIR
-#     full_path = os.path.join(output_dir, 'deletion_test', 'delete_test.gpkg')
-#     f = open(full_path, 'w')
-#
-#
-#     print("On Developing")
-#     pass
+def test_delete_old_packages():
+
+    # creating file to test
+    output_dir = config.PACKAGE_OUTPUT_DIR
+    # full_path = os.path.join(output_dir, 'deletion_test', 'delete_test.gpkg')
+    full_path = os.path.join(output_dir, 'e_tests', 'r_short.GPKG')
+
+    try:
+        f = open(full_path, 'r')
+    except Exception:
+        f = None
+
+    assert f, ('File note exist on directory: %s' % full_path)
+    if f:
+        f.close()
+
+    resp, uuid = exc.create_testing_status(output_dir, 'e_tests', 'r_short.GPKG')
+
+    s_code, content = common.response_parser(resp)
+    exc.delete_requests(config.EXPORT_STORAGE_URL, [uuid])
+    assert s_code == config.ResponseCode.Ok.value, content
+    print("On Developing")
+    pass
+
 
 def test_export_on_storage():
     """ Test case: Package created on shared folder
@@ -161,6 +179,10 @@ def test_download_package():
     _log.info('Finish running test: %s', test_export_geopackage.__name__)
 
 
+def teardown_module(module):
+    exc.clear_all_tasks(config.EXPORT_STORAGE_URL)
+    print("environment was cleaned up")
+
 # example for future implementation of async tests
 # @pytest.mark.asyncio
 # async def test_app(create_x, auth):
@@ -172,4 +194,4 @@ def test_download_package():
 # test_export_on_storage()
 # test_download_package()
 # test_export_geopackage()
-# test_box_size_limit()
+test_box_size_limit()
