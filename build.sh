@@ -25,6 +25,7 @@ echo automation-test:$VERSION > ./docker_images/generated_dockers.txt
 FILE_NAME=automation-test:${VERSION}.tar
 DUMP_OUTPUT_PATH=${OUTPUT_DIR}/releases/${FILE_NAME}
 
+echo "bla"
 if [[ ! -z "${DUMP_IMAGE}" ]]
 then
      docker save -o ./${DUMP_OUTPUT_PATH} automation-test:$VERSION
