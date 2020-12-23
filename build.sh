@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 if [ -d "docker_images" ]
 then
     echo "Directory docker_images exist and result will be saved to directory."
