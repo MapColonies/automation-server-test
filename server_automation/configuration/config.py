@@ -59,3 +59,21 @@ PACKAGE_OUTPUT_DIR = common.get_environment_variable('OUTPUT_EXPORT_PATH', '/hom
 
 EXPORT_DOWNLOAD_DIR_NAME = common.get_environment_variable('TEST_DIR_NAME', 'test_dir')
 EXPORT_DOWNLOAD_FILE_NAME = common.get_environment_variable('TEST_PKG_NAME', 'exporter_tests')
+
+
+############################### S3 ############################################
+S3_EXPORT_STORAGE_MODE = common.get_environment_variable('S3_EXPORT_STORAGE_MODE', False )
+S3_DOWNLOAD_EXPIRATION_TIME = common.get_environment_variable("S3_DOWNLOAD_EXPIRED_TIME", 3600)
+S3_DOWNLOAD_DIRECTORY = common.get_environment_variable('S3_DOWNLOAD_DIR', '/tmp/')
+S3_BOCKET_NAME = common.get_environment_variable('S3_BUCKET_NAME', 'test')
+S3_ACCESS_KEY = common.get_environment_variable('S3_ACCESS_KEY', 'AKIAIOSFODNN7EXAMPLE')
+S3_SECRET_KEY = common.get_environment_variable('S3_SECRET_KEY', 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY')
+S3_END_POINT = common.get_environment_variable('S3_END_POINT', 'http://localhost:9000/minio')
+
+
+
+
+############################ AUTOMATION DEV ENVIRONMENT VARIABLE ##############
+DEV_MODE = common.get_environment_variable('DEV_MODE', True) # todo when will be qa environment should be replaced False
+
+BEST_LAYER_URL = common.get_environment_variable('BEST_LAYER', "http://10.28.11.95:8080/service?REQUEST=GetMap&SERVICE=WMS&LAYERS=combined_layers")

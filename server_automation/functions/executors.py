@@ -1,6 +1,7 @@
 from server_automation.exporter_api import storage_utils as su
 from server_automation.exporter_api import base_requests as br
 from server_automation.utils import common
+from server_automation.utils import s3storage as s3
 from server_automation.configuration import config
 # from geopackage_tools.infra import db_conn as db
 from geopackage_tools.validators import validator as gpv
@@ -10,13 +11,21 @@ import os
 import time
 from datetime import datetime, timedelta
 
-_logger = logging.getLogger("server.executors")
+_logger = logging.getLogger("server_automation.function.executors")
 
 
-def send_export_request(request_dict, request_path=None):
+def get_task_status(uuid):
+    """
+    This method provide task status by providing uuid (task id)
+    """
+    res = su.get_uuid_status(common.combine_url(config.EXPORT_STORAGE_URL, config.STATUSES_API), uuid)
+    return res
+
+
+def send_export_request(request_dict, request_path=None, request_name=None):
     """
     This method send export request of geopackage to trigger service
-    :param request: this is dict represent valid request
+    :param request_dict: this is dict represent valid request
     :param request_path: string
     :return: status http code (int) and response body (dict)
     """
@@ -41,6 +50,8 @@ def send_export_request(request_dict, request_path=None):
         raise Exception('Unknown error with opening request')
 
     request = json.loads(request)
+    if request_name:
+        request['fileName'] = request_name
     api_url = common.combine_url(config.EXPORT_TRIGGER_URL, config.EXPORT_GEOPACKAGE_API)
     _logger.info('Send request: %s to export with url: %s' % (request['fileName'], api_url))
     resp = br.send_post_request(api_url, request)
@@ -121,11 +132,21 @@ def validate_geo_package(uri):
     :param uri: geopackage path
     :return:bool - True if package created ok with relevant content
     """
+    if config.S3_EXPORT_STORAGE_MODE:
+        s3_conn = s3.S3Client(config.S3_END_POINT, config.S3_ACCESS_KEY, config.S3_SECRET_KEY)
+        object_key = "/".join(uri.split("/")[-2:])
 
-    if not os.path.exists(config.PACKAGE_OUTPUT_DIR):
-        _logger.error(
-            "Output directory not exist [%s]- validate mapping and directory on config" % (config.PACKAGE_OUTPUT_DIR))
-        raise Exception("Output directory: [%s] not found ! validate config \ mapping" % (config.PACKAGE_OUTPUT_DIR))
+        destination_dir = os.path.join(config.S3_DOWNLOAD_DIRECTORY, object_key.split('.')[0])
+        if not os.path.exists(destination_dir):
+            os.makedirs(destination_dir)
+
+        s3_conn.download_from_s3(config.S3_BOCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
+        uri = os.path.join(destination_dir, destination_dir.split('/')[-1])
+    else: #FS
+        if not os.path.exists(config.PACKAGE_OUTPUT_DIR):
+            _logger.error(
+                "Output directory not exist [%s]- validate mapping and directory on config" % (config.PACKAGE_OUTPUT_DIR))
+            raise Exception("Output directory: [%s] not found ! validate config \ mapping" % (config.PACKAGE_OUTPUT_DIR))
 
     # TODO fix after environment will be fixed
     # if not os.path.exists(uri):
@@ -209,3 +230,29 @@ def create_testing_status(url, directory_name, fileName):
         _logger.error('Error while trying create new task with - status: %d | error: %s', resp.status_code, resp.content)
         return resp, "None"
 
+
+def is_geopackage_exist(file_url, request=None, test_name="test name N\A"):
+    """
+    Validation of specific geopackge on S3\File system
+    """
+    if config.S3_EXPORT_STORAGE_MODE:
+        _logger.info('Test running on s3 mode')
+        try:
+            s3_conn = s3.S3Client(config.S3_END_POINT, config.S3_ACCESS_KEY, config.S3_SECRET_KEY)
+        except Exception as e:
+            _logger.error('Some error occur one connection to S3')
+            raise e
+        if isinstance(request, str):
+            request = json.loads(request)
+        object_key = ".".join([request['fileName'], config.PACKAGE_EXT])
+        object_key = "/".join([request['directoryName'], object_key])
+        res = s3_conn.is_file_exist(config.S3_BOCKET_NAME, object_key)
+        pkg_url = file_url.split('?')[0] if '?' in file_url else file_url # todo - update after download link will be
+        return res, pkg_url
+
+    else:
+        _logger.info('Test running on file-system mode')
+        pkg_url = common.combine_url(config.PACKAGE_OUTPUT_DIR, *(file_url.split('/')[-2:]))
+        _logger.info(pkg_url)
+        res = os.path.exists(pkg_url),
+        return res, pkg_url

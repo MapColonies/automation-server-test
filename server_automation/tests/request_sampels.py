@@ -1,10 +1,10 @@
 import json
 import enum
-
+from server_automation.configuration import config
 
 class box_size(enum.Enum):
     Big = 150,
-    Medium = 50,
+    Medium = 150,
     Small = 10,
     Sanity = 1
 
@@ -18,7 +18,8 @@ _et_req_1 = {
     "exportedLayers": [
         {
             "exportType": "raster",
-            "url": "http://10.28.11.125/blue_m_flat2d-v001/wms?SERVICE=WMS&LAYERS=[blue_m_flat2d-v001]:1002&TILED=true"
+            "url": config.BEST_LAYER_URL,
+            # "url": "http://10.28.11.125/blue_m_flat2d-v001/wms?SERVICE=WMS&LAYERS=[blue_m_flat2d-v001]:1002&TILED=true"
         }
     ],
     "bbox": [
@@ -38,7 +39,8 @@ _et_req_2 = {
     "exportedLayers": [
         {
             "exportType": "raster",
-            "url": "http://10.28.11.125/blue_m_flat2d-v001/wms?SERVICE=WMS&LAYERS=[blue_m_flat2d-v001]:1002&TILED=true"
+            "url": config.BEST_LAYER_URL,
+            # "url": "http://10.28.11.125/blue_m_flat2d-v001/wms?SERVICE=WMS&LAYERS=[blue_m_flat2d-v001]:1002&TILED=true"
         }
     ],
     "bbox": [
@@ -59,7 +61,8 @@ _et_req_3 = {
     "exportedLayers": [
         {
             "exportType": "raster",
-            "url": "http://10.28.11.125/blue_m_flat2d-v001/wms?SERVICE=WMS&LAYERS=[blue_m_flat2d-v001]:1002&TILED=true"
+            "url": config.BEST_LAYER_URL,
+            # "url": "http://10.28.11.125/blue_m_flat2d-v001/wms?SERVICE=WMS&LAYERS=[blue_m_flat2d-v001]:1002&TILED=true"
         }
     ],
     "bbox": [

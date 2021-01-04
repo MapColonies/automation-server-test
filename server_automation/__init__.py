@@ -24,7 +24,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 if file_log:
     log_file_name = ".".join([str(datetime.datetime.utcnow()), 'log'])
-    fh = logging.FileHandler(os.path.join(log_output_path,log_file_name))
+    fh = logging.FileHandler(os.path.join(log_output_path, log_file_name))
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
