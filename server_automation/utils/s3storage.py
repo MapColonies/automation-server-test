@@ -8,7 +8,7 @@ import logging
 _log = logging.getLogger('server_automation.utils.s3storage')
 
 
-class S3Client(object):
+class S3Client(object): # todo - validate with no parenthesis on pylint
     """
     This class implements s3 functionality
     """

@@ -10,9 +10,9 @@ export LOGS_OUTPUT=/tmp/mc_logs
 
 #S3 configuration
 export S3_EXPORT_STORAGE_MODE=TRUE
-export S3_ACCESS_KEY=raster
-export S3_SECRET_KEY=rasterPassword
-export S3_END_POINT=http://10.28.11.123:9000/minio/
+#export S3_ACCESS_KEY=raster
+#export S3_SECRET_KEY=rasterPassword
+#export S3_END_POINT=http://10.28.11.123:9000/minio/
 export S3_BUCKET_NAME=mapping-images
 export S3_DOWNLOAD_DIR=/tmp
 

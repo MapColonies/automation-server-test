@@ -11,7 +11,7 @@ from server_automation.tests import request_sampels
 from server_automation.functions import executors as exc
 from server_automation.configuration import config
 from server_automation.utils import common
-
+from conftest import ValueStorage
 _log = logging.getLogger('server_automation.tests.exporter_tool_tests')
 uuids = []
 
@@ -74,6 +74,7 @@ def test_export_geopackage():
 
     # if config.DEV_MODE and content.get('uuid',None):
     # exc.delete_requests(config.EXPORT_STORAGE_URL, [content['uuid']])
+
     _log.info('Finish running test: %s', test_export_geopackage.__name__)
 
 
@@ -184,6 +185,11 @@ def test_export_on_storage():
     assert gpkg_exist, \
         f'Test: [{test_export_on_storage.__name__}] Failed: file not exist on storage [disk \ S3 ]:[{pkg_url}]'
 
+    # store data for download test
+    ValueStorage.gpkg_download_url = res['fileURI']
+    ValueStorage.file_name = request['fileName']
+    ValueStorage.directory_name = request['directoryName']
+
     # exc.delete_requests(config.EXPORT_STORAGE_URL, [content['uuid']])
     _log.info('Finish running test: %s', test_export_on_storage.__name__)
 
@@ -195,22 +201,29 @@ def test_download_package():
 
         This test validates that geoPackage that was created on storage can be downloaded locally and valid as original
     """
-    _log.info('Start running test: %s', test_export_geopackage.__name__)
+    _log.info('Start running test: %s', test_download_package.__name__)
 
     #  validate exported file exist on storage from previous test - test_export_on_storage
-    pkg_url = common.combine_url(config.PACKAGE_OUTPUT_DIR, config.EXPORT_DOWNLOAD_DIR_NAME,
-                                 ".".join([config.EXPORT_DOWNLOAD_FILE_NAME, config.PACKAGE_EXT]))
-    assert os.path.exists(pkg_url), print("File not exist on storage %s" % pkg_url)
+    _log.info(ValueStorage.gpkg_download_url)
+    assert ValueStorage.gpkg_download_url, \
+        f'Test: [{test_download_package.__name__}] Failed: Download URI not found!]'
+    # pkg_url = common.combine_url(config.PACKAGE_OUTPUT_DIR, config.EXPORT_DOWNLOAD_DIR_NAME,
+    #                              ".".join([config.EXPORT_DOWNLOAD_FILE_NAME, config.PACKAGE_EXT]))
+    # assert os.path.exists(pkg_url), print("File not exist on storage %s" % pkg_url)
 
     #  send and receive download file request
-    s_code, downloaded_data = exc.send_download_request(config.EXPORT_DOWNLOAD_DIR_NAME,
-                                                        config.EXPORT_DOWNLOAD_FILE_NAME)
-    assert s_code == config.ResponseCode.Ok.value, ("failed download with status code %d" % s_code)
-
+    s_code, downloaded_data = exc.send_download_request(ValueStorage.gpkg_download_url)
+    assert s_code == config.ResponseCode.Ok.value, \
+        f'Test: [{test_download_package.__name__}] Failed: Download request failed with status code: [{s_code}])'
+    orig_exported = exc.load_gpkg_from_storage(ValueStorage.file_name, ValueStorage.directory_name)
     #  compare downloaded and exported files by hashing
-    orig_exported = exc.common.load_file_as_bytearray(pkg_url)  # bytes array
-    assert common.generate_unique_fingerprint(orig_exported) == common.generate_unique_fingerprint(downloaded_data), (
-        "download package not equal to exported package")
+    # orig_exported = exc.common.load_file_as_bytearray(pkg_url)  # bytes array
+
+    fp_orig = common.generate_unique_fingerprint(orig_exported)
+    fp_downloaded = common.generate_unique_fingerprint(downloaded_data)
+    assert fp_orig == fp_downloaded,\
+        f'Test: [{test_download_package.__name__}] Failed: download geopackage is not equal to stored: [{fp_orig}] != [{fp_downloaded}])'
+
 
     _log.info('Finish running test: %s', test_download_package.__name__)
 
@@ -231,5 +244,5 @@ def teardown_module(module):
 # test_export_geopackage()
 # test_box_size_limit()
 test_export_on_storage()
-# test_download_package()
+test_download_package()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)

@@ -60,18 +60,31 @@ def send_export_request(request_dict, request_path=None, request_name=None):
 
     return status_code, content
 
+#deprication
+# def send_download_request(subdir, file_name, url=config.DOWNLOAD_STORAGE_URL):
+#     """
+#     This method send download request for package that was created on shared folder on storage
+#     :param url: shared folder uri
+#     :param subdir: relative shared folder subdir name
+#     :param file_name: geopackage file name
+#     :return: status code + response content
+#     """
+#     api_url = common.combine_url(url, config.DOWNLOAD_API, subdir, '.'.join([file_name, config.PACKAGE_EXT]))
+#     _logger.info('Send download request: %s' % api_url)
+#     resp = br.send_get_request(api_url)
+#     return resp.status_code, resp.content
 
-def send_download_request(subdir, file_name, url=config.DOWNLOAD_STORAGE_URL):
+
+
+
+def send_download_request(pkg_download_url):
     """
     This method send download request for package that was created on shared folder on storage
-    :param url: shared folder uri
-    :param subdir: relative shared folder subdir name
-    :param file_name: geopackage file name
+    :param pkg_download_url: download uri
     :return: status code + response content
     """
-    api_url = common.combine_url(url, config.DOWNLOAD_API, subdir, '.'.join([file_name, config.PACKAGE_EXT]))
-    _logger.info('Send download request: %s' % api_url)
-    resp = br.send_get_request(api_url)
+    _logger.info('Send download request: %s' % pkg_download_url)
+    resp = br.send_get_request(pkg_download_url)
     return resp.status_code, resp.content
 
 
@@ -125,6 +138,26 @@ def exporter_follower(url, uuid):
 
     return results
 
+
+def load_gpkg_from_storage(file_name, directory_name):
+    if config.S3_EXPORT_STORAGE_MODE:
+        s3_conn = s3.S3Client(config.S3_END_POINT, config.S3_ACCESS_KEY, config.S3_SECRET_KEY)
+        object_key = "/".join([directory_name, ".".join([file_name,config.PACKAGE_EXT])])
+
+        destination_dir = os.path.join(config.S3_DOWNLOAD_DIRECTORY, object_key.split('.')[0])
+        if not os.path.exists(destination_dir):
+            os.makedirs(destination_dir)
+
+        s3_conn.download_from_s3(config.S3_BOCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
+        uri = os.path.join(destination_dir, destination_dir.split('/')[-1])
+
+
+    else:
+        uri = common.combine_url(config.PACKAGE_OUTPUT_DIR, config.EXPORT_DOWNLOAD_DIR_NAME,
+                                 ".".join([config.EXPORT_DOWNLOAD_FILE_NAME, config.PACKAGE_EXT]))
+
+    pkg = common.load_file_as_bytearray(uri)
+    return pkg
 
 def validate_geo_package(uri):
     """
@@ -256,3 +289,7 @@ def is_geopackage_exist(file_url, request=None, test_name="test name N\A"):
         _logger.info(pkg_url)
         res = os.path.exists(pkg_url),
         return res, pkg_url
+
+
+def get_test_download_url():
+    """ This helper method generate and return url of geopackge download - for FS ans OS"""
