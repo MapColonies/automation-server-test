@@ -20,8 +20,8 @@ This code provide tests that validate and testing entire tools provided for Map 
     ``python3 setup.py sdist bdist_wheel``
 *** 
 ### Raster
- - Exporter tools - server side epic:
-   - Export data as valid geoPackages format
+ - Exporter tools - server side test cases:
+   - Exporting data as geopackage with best layer
    - Export according restricted region size of geoPackage
    - Deletion of old packages after configurable time period -TBD [not implemented yet]
    - Package created on shared folder
@@ -30,5 +30,17 @@ This code provide tests that validate and testing entire tools provided for Map 
    ##### usage:
    1. To run functional testing on exporter tool:\
    ``pytest server_automation/tests/test_exporter_tools.py``
-   2. To external debug mode logging run:\
-   ``Add the variable <DEBUG_LOGS=True> before previous command``
+   2. Logging:\
+        1.``Add  variable <DEBUG_LOGS=1> for debog logging level``\
+        2.``Add variable <FILE_LOGS=1> to write logs into file beside consule``\
+        3.``Add variable <LOGS_OUTPU=/tmp/directory/for/logs>``
+   3. Choose storage method - S3 OR File System:\
+   ``Add the variable <S3_EXPORT_STORAGE_MODE=True> for S3 mode or False for file system``
+   4. if you choose S3 mode you should provide following variable on running:
+        1. ``S3_ACCESS_KEY=<aws access key>``
+        2. ``S3_SECRET_KEY=<aws secret key>`` 
+        3. ``S3_END_POINT=<provided valid aws endpoint>``
+        4. ``S3_BUCKET_NAME=<relevant bucket>``
+        5. ``S3_DOWNLOAD_DIR=<temp directory> - as default ->/tmp/``
+   5. In case running test with File system option\
+   ``OUTPUT_EXPORT_PATH=<relevant directory mounted to worker's output dir - relative>``

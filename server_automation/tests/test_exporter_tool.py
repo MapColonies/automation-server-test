@@ -12,16 +12,18 @@ from server_automation.functions import executors as exc
 from server_automation.configuration import config
 from server_automation.utils import common
 from conftest import ValueStorage
+
 _log = logging.getLogger('server_automation.tests.exporter_tool_tests')
 uuids = []
 
 
 def test_export_geopackage():
-    """ Test case: Export data as valid geoPackages format
-        Validate epic 4 – server side – requirement 2
-        This test validates that geoPackage includes all tiles and their relative metadata.
+    """ Test case: [Export geopackage] Exporting data as geopackage with best layer
+        -----------------------------------------------------------------------------
+        Validate requirement 2 – server side – 1 Export API
+        -----------------------------------------------------------------------------
+        This test validates exporting geoPackage includes all tiles and their relative metadata based on best layer.
     """
-
     _log.info(f'Start running test: {test_export_geopackage.__name__}')
     # check and load request json
     request = request_sampels.get_request_sample('et_req_2')
@@ -79,13 +81,13 @@ def test_export_geopackage():
 
 
 def test_box_size_limit():
-    """ Test case: Export according restricted region size of geoPackage
-
-        Validate epic 4 – server side – requirement 3
-
+    """ Test case: [limits] Export according restricted region size of geoPackage
+        -----------------------------------------------------------------------------
+        Validate requirement 12 – server side – 1 Export API
+        -----------------------------------------------------------------------------
         Test creation of geoPackage data, bounded by region size configuration value.
         Default configuration parameter (100X100 according to epic).
-        Fail if required region size is greater than this value.
+         Fail if required region size is greater than this value.
     """
 
     _log.info('Start running test: %s', test_export_geopackage.__name__)
@@ -115,14 +117,20 @@ def test_box_size_limit():
         res = None
         err = str(e)
     assert res, ('Error while exporting package - exporter follow stage %s' % err)
-    # exc.delete_requests(config.EXPORT_STORAGE_URL, [content['uuid']])
+
     _log.info('Finish running test: %s', test_box_size_limit.__name__)
 
-
+    # exc.delete_requests(config.EXPORT_STORAGE_URL, [content['uuid']]) # its for debug developing
 # todo - complite test
 
 # def test_delete_old_packages():
-#
+"""
+    Test case: [cleanup] Deletion of old packages after configurable time period - TBD
+    -----------------------------------------------------------------------------
+    Validate requirement 9 – server side – 1 Export API
+    -----------------------------------------------------------------------------
+    This test check if the system will clear automatically old packages according to configuration value 
+"""
 #     # creating file to test
 #     output_dir = config.PACKAGE_OUTPUT_DIR
 #     # full_path = os.path.join(output_dir, 'deletion_test', 'delete_test.gpkg')
@@ -147,9 +155,12 @@ def test_box_size_limit():
 
 
 def test_export_on_storage():
-    """ Test case: Package created on shared folder
-        Validate epic 4 – server side – requirement 5
-        This test validates that geoPackage that was created on storage can be downloaded locally and valid as original
+    """ Test case: package created on shared folder\S3
+        -----------------------------------------------------------------------------
+        Validate requirement 1 – server side – 1 Export API
+        -----------------------------------------------------------------------------
+        This test check if the package been exported to configurable directory of shared folder \ s3
+        and local downloading functionality (depends on worker configuration
     """
     _log.info('Start running test: %s', test_export_on_storage.__name__)
 
@@ -178,12 +189,14 @@ def test_export_on_storage():
     assert res, \
         f'Test: [{test_export_on_storage.__name__}] Failed: on follow (worker stage) with message: [{err}]'
 
-    # validate file places on storage
-    file_location = res['fileURI']
+    # validate file places on storage - this is download url
+    file_location = res.get('fileURI')
+    assert file_location, \
+        f'Test: [{test_export_on_storage.__name__}] Failed: download link not exist | created]'
     _log.debug(f'File uri expected: {file_location}')
     gpkg_exist, pkg_url = exc.is_geopackage_exist(file_location, request=request)
     assert gpkg_exist, \
-        f'Test: [{test_export_on_storage.__name__}] Failed: file not exist on storage [disk \ S3 ]:[{pkg_url}]'
+        f'Test: [{test_export_on_storage.__name__}] Failed: file not exist on storage [disk | S3 ]:[{pkg_url}]'
 
     # store data for download test
     ValueStorage.gpkg_download_url = res['fileURI']
@@ -221,17 +234,16 @@ def test_download_package():
 
     fp_orig = common.generate_unique_fingerprint(orig_exported)
     fp_downloaded = common.generate_unique_fingerprint(downloaded_data)
-    assert fp_orig == fp_downloaded,\
+    assert fp_orig == fp_downloaded, \
         f'Test: [{test_download_package.__name__}] Failed: download geopackage is not equal to stored: [{fp_orig}] != [{fp_downloaded}])'
-
 
     _log.info('Finish running test: %s', test_download_package.__name__)
 
 
 def teardown_module(module):
-    exc.clear_all_tasks(config.EXPORT_STORAGE_URL)
+    # exc.clear_all_tasks(config.EXPORT_STORAGE_URL)
+    exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
     print("environment was cleaned up")
-
 
 # example for future implementation of async tests
 # @pytest.mark.asyncio
@@ -243,6 +255,6 @@ def teardown_module(module):
 # test_delete_old_packages()
 # test_export_geopackage()
 # test_box_size_limit()
-test_export_on_storage()
-test_download_package()
+# test_export_on_storage()
+# test_download_package()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
