@@ -97,12 +97,12 @@ def test_box_size_limit():
     s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big")
     assert config.ResponseCode.ValidationErrors.value == s_code and content[
         'name'] == config.BOX_LIMIT_ERROR, "limit box test failed"
-    if not os.environ['DEV_MODE']:  # on QA environment the limit size can be changes and its to prevent overload
-        request = request_sampels.get_request_by_box_size(request_sampels.box_size.Medium)
-        assert request
-        s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_medium')
-        assert config.ResponseCode.ValidationErrors.value == s_code and content[
-            'name'] == config.BOX_LIMIT_ERROR, "limit box test failed"
+    # if not os.environ.get('DEV_MODE'):  # on QA environment the limit size can be changes and its to prevent overload
+    #     request = request_sampels.get_request_by_box_size(request_sampels.box_size.Medium)
+    #     assert request
+    #     s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_medium')
+    #     assert config.ResponseCode.ValidationErrors.value == s_code and content[
+    #         'name'] == config.BOX_LIMIT_ERROR, "limit box test failed"
 
     request = request_sampels.get_request_by_box_size(request_sampels.box_size.Sanity)
     assert request

@@ -21,6 +21,7 @@ docs/_build
 /dist
 /venv
 /samples
+/docker_images
 
 venv
 samples
