@@ -2,11 +2,41 @@ import json
 import enum
 from server_automation.configuration import config
 
+
 class box_size(enum.Enum):
     Big = 150,
     Medium = 150,
     Small = 10,
     Sanity = 1
+
+
+class ZoomLevels(enum.Enum):
+    """
+    Types of zoom levels
+    """
+    default = 18
+    med = 15
+
+_lod_req = {
+    "fileName": "unknown_name",
+    "sizeEst": 30,
+    "tilesEst": 51,
+    "maxZoom": 18,
+    "directoryName": "test_dir",
+    "exportedLayers": [
+        {
+            "exportType": "raster",
+            "sourceLayer": config.SOURCE_LAYER,
+            "url": config.BEST_LAYER_URL,
+        }
+    ],
+    "bbox": [
+        35.32951416015625,
+        32.13432373046876,
+        35.35697998046875,
+        32.16178955078126
+    ]
+}
 
 
 _et_req_1 = {
@@ -18,6 +48,7 @@ _et_req_1 = {
     "exportedLayers": [
         {
             "exportType": "raster",
+            "sourceLayer": config.SOURCE_LAYER,
             "url": config.BEST_LAYER_URL,
             # "url": "http://10.28.11.125/blue_m_flat2d-v001/wms?SERVICE=WMS&LAYERS=[blue_m_flat2d-v001]:1002&TILED=true"
         }
@@ -39,6 +70,7 @@ _et_req_2 = {
     "exportedLayers": [
         {
             "exportType": "raster",
+            "sourceLayer": config.SOURCE_LAYER,
             "url": config.BEST_LAYER_URL,
             # "url": "http://10.28.11.125/blue_m_flat2d-v001/wms?SERVICE=WMS&LAYERS=[blue_m_flat2d-v001]:1002&TILED=true"
         }
@@ -61,6 +93,7 @@ _et_req_3 = {
     "exportedLayers": [
         {
             "exportType": "raster",
+            "sourceLayer": config.SOURCE_LAYER,
             "url": config.BEST_LAYER_URL,
             # "url": "http://10.28.11.125/blue_m_flat2d-v001/wms?SERVICE=WMS&LAYERS=[blue_m_flat2d-v001]:1002&TILED=true"
         }
@@ -74,7 +107,7 @@ _box_10_10 = [34.937897, 31.854815, 35.044155, 31.944588]
 _box_50_50 = [34.894638, 31.670915, 35.215130, 31.947210]
 _box_150_150 = [34.321289, 30.491284, 35.911560, 31.844899]
 
-request_index = {'et_req_1': _et_req_1, 'et_req_2': _et_req_2}
+request_index = {'et_req_1': _et_req_1, 'et_req_2': _et_req_2,'lod_req': _lod_req}
 
 
 def show_requests():
@@ -102,6 +135,17 @@ def get_request_sample(req_name):
         raise Exception('Unknown error')
 
 
+def get_lod_req(size):
+    """ provide valid zoom level according enum provided - ZoomLevels """
+    if size == ZoomLevels.default:
+        _lod_req['maxZoom'] = ZoomLevels.default.value
+    elif size == ZoomLevels.med:
+        _lod_req['maxZoom'] = ZoomLevels.med.value
+    else:
+        raise Exception("should provide valid max level value")
+    return json.dumps(_lod_req)
+
+
 def get_request_by_box_size(size):
     if size==box_size.Big:
         _et_req_3["bbox"] = _box_150_150
@@ -112,5 +156,5 @@ def get_request_by_box_size(size):
     elif size==box_size.Sanity:
         return json.dumps(_et_req_2)
     else:
-        raise Exception("should provide valide box size parameters for request")
+        raise Exception("should provide valid box size parameters for request")
     return json.dumps(_et_req_3)

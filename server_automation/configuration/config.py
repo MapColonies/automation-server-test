@@ -13,6 +13,8 @@ class ResponseCode(enum.Enum):
     DuplicatedError = 409  # in case of requesting package with same name already exists
 
 
+
+
 ###########      error massages     ##########
 BOX_LIMIT_ERROR = 'ERR_BBOX_AREA_TOO_LARGE'
 ##############################################
@@ -50,15 +52,15 @@ EXPORT_STATUS_FAILED = "Failed"
 # EXPORT_REQUEST_PATH = "/home/ronenk1/dev/server/samples/request_short.json"
 
 ################################## timings ###################################
-MAX_EXPORT_RUNNING_TIME = 60 * common.get_environment_variable('MAX_EXPORT_RUNNING_TIME', 1)  # min
+MAX_EXPORT_RUNNING_TIME = 60 * common.get_environment_variable('MAX_EXPORT_RUNNING_TIME', 5)  # min
 
 # PACKAGE_OUTPUT_DIR = '/mnt/outputs'
 # PACKAGE_OUTPUT_DIR = '/mnt/exporter-worker/outputs'
 
 PACKAGE_OUTPUT_DIR = common.get_environment_variable('OUTPUT_EXPORT_PATH', '/home/ronenk1/dev/output')
 
-EXPORT_DOWNLOAD_DIR_NAME = common.get_environment_variable('TEST_DIR_NAME', 'test_dir')
-EXPORT_DOWNLOAD_FILE_NAME = common.get_environment_variable('TEST_PKG_NAME', 'exporter_tests')
+EXPORT_DOWNLOAD_DIR_NAME = common.get_environment_variable('TEST_DIR_NAME', 'download_test')
+EXPORT_DOWNLOAD_FILE_NAME = common.get_environment_variable('TEST_PKG_NAME', 'test_case_9_exporter_api')
 
 
 ############################### S3 ############################################
@@ -74,6 +76,8 @@ S3_END_POINT = common.get_environment_variable('S3_END_POINT', 'http://localhost
 
 
 ############################ AUTOMATION DEV ENVIRONMENT VARIABLE ##############
-DEV_MODE = common.get_environment_variable('DEV_MODE', True) # todo when will be qa environment should be replaced False
+DEV_MODE = common.get_environment_variable('DEV_MODE', True)  # todo when will be qa environment should be replaced False
 
 BEST_LAYER_URL = common.get_environment_variable('BEST_LAYER', "http://10.28.11.95:8080/service?REQUEST=GetMap&SERVICE=WMS&LAYERS=combined_layers")
+SOURCE_LAYER = common.get_environment_variable('SOURCE_LAYER', 'combined_layers')
+

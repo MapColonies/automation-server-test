@@ -16,11 +16,15 @@ from conftest import ValueStorage
 _log = logging.getLogger('server_automation.tests.exporter_tool_tests')
 uuids = []
 
+####################################### setup_tests #######################################
+
+###########################################################################################
+
 
 def test_export_geopackage():
-    """ Test case: [Export geopackage] Exporting data as geopackage with best layer
+    """ 1. Test case: Exporting Orthophoto (raster data) as geopackage with specific layer
         -----------------------------------------------------------------------------
-        Validate requirement 2 – server side – 1 Export API
+        Validate requirement 1+2 – server side – 1 Export API
         -----------------------------------------------------------------------------
         This test validates exporting geoPackage includes all tiles and their relative metadata based on best layer.
     """
@@ -32,7 +36,7 @@ def test_export_geopackage():
 
     # sending json request and validating export process
     request = json.loads(request)
-    request['fileName'] = 'test1_export_geopackage'
+    request['fileName'] = 'test_case_1_exporter_api'
     request = json.dumps(request)
     s_code, content = exc.send_export_request(request)
     assert s_code == config.ResponseCode.Ok.value, \
@@ -58,16 +62,9 @@ def test_export_geopackage():
     _log.debug(f'File uri expected: {file_location}')
 
     gpkg_exist, pkg_url = exc.is_geopackage_exist(file_location, request=request)
-    # if config.S3_EXPORT_STORAGE_MODE:
-    #     _log.info('Test running on s3 mode')
-    #     s3_conn = s3.S3Client(config.S3_END_POINT, config.S3_ACCESS_KEY, config.S3_SECRET_KEY)
-    #     assert s3_conn.is_file_exist(config.S3_BOCKET_NAME, ".".join([request['fileName'], config.PACKAGE_EXT])), 'file not exist on s3'
-    # else:
-    #     _log.info('Test running on file-system mode')
-    #     pkg_url = common.combine_url(config.PACKAGE_OUTPUT_DIR, *(file_location.split('/')[-2:]))
-    #     _log.info(pkg_url)
+
     assert gpkg_exist, \
-        f'Test: [{test_export_geopackage.__name__}] Failed: file not exist on storage [disk \ S3 ]:[{pkg_url}]'
+        f'Test: [{test_export_geopackage.__name__}] Failed: file not exist on storage [disk | S3 ]:[{pkg_url}]'
 
     # validate the package was created properly
     is_valid_package = exc.validate_geo_package(pkg_url)
@@ -81,13 +78,13 @@ def test_export_geopackage():
 
 
 def test_box_size_limit():
-    """ Test case: [limits] Export according restricted region size of geoPackage
+    """ 6. Test case: Export orthophoto according restricted region size (bbox) as geoPackage
         -----------------------------------------------------------------------------
         Validate requirement 12 – server side – 1 Export API
         -----------------------------------------------------------------------------
         Test creation of geoPackage data, bounded by region size configuration value.
-        Default configuration parameter (100X100 according to epic).
-         Fail if required region size is greater than this value.
+        Default configuration parameter (100X100).
+        Fail if required region size is greater than this value.
     """
 
     _log.info('Start running test: %s', test_export_geopackage.__name__)
@@ -97,19 +94,19 @@ def test_box_size_limit():
     assert request
 
     # sending requests with different bbox sizes
-    s_code, content = exc.send_export_request(request, request_name="test2_box_size_limit_big")
+    s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big")
     assert config.ResponseCode.ValidationErrors.value == s_code and content[
         'name'] == config.BOX_LIMIT_ERROR, "limit box test failed"
     if not os.environ['DEV_MODE']:  # on QA environment the limit size can be changes and its to prevent overload
         request = request_sampels.get_request_by_box_size(request_sampels.box_size.Medium)
         assert request
-        s_code, content = exc.send_export_request(request, request_name='test2_box_size_limit_medium')
+        s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_medium')
         assert config.ResponseCode.ValidationErrors.value == s_code and content[
             'name'] == config.BOX_LIMIT_ERROR, "limit box test failed"
 
     request = request_sampels.get_request_by_box_size(request_sampels.box_size.Sanity)
     assert request
-    s_code, content = exc.send_export_request(request, request_name='test2_box_size_limit_small')
+    s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_small')
     try:
         res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
         uuids.append(content['uuid'])
@@ -120,17 +117,21 @@ def test_box_size_limit():
 
     _log.info('Finish running test: %s', test_box_size_limit.__name__)
 
-    # exc.delete_requests(config.EXPORT_STORAGE_URL, [content['uuid']]) # its for debug developing
-# todo - complite test
 
-# def test_delete_old_packages():
-"""
-    Test case: [cleanup] Deletion of old packages after configurable time period - TBD
-    -----------------------------------------------------------------------------
-    Validate requirement 9 – server side – 1 Export API
-    -----------------------------------------------------------------------------
-    This test check if the system will clear automatically old packages according to configuration value 
-"""
+def test_cleanup_gpkg():
+    """
+        7. Test case: Deletion of old packages after configurable time period
+        -----------------------------------------------------------------------------
+        Validate requirement 9 – server side – 1 Export API
+        -----------------------------------------------------------------------------
+        This test check if the system will clear automatically old packages according to configuration value
+        (default is 7 days)
+    """
+    _log.info('Start running test: %s', test_cleanup_gpkg.__name__)
+    _log.info('Test %s not implemented for current auto version', test_cleanup_gpkg.__name__)
+    _log.info('Finish running test: %s', test_cleanup_gpkg.__name__)
+
+
 #     # creating file to test
 #     output_dir = config.PACKAGE_OUTPUT_DIR
 #     # full_path = os.path.join(output_dir, 'deletion_test', 'delete_test.gpkg')
@@ -155,11 +156,11 @@ def test_box_size_limit():
 
 
 def test_export_on_storage():
-    """ Test case: package created on shared folder\S3
+    """ 8. Test case: Run export request and create geopackage on shared folder|S3
         -----------------------------------------------------------------------------
         Validate requirement 1 – server side – 1 Export API
         -----------------------------------------------------------------------------
-        This test check if the package been exported to configurable directory of shared folder \ s3
+        This test check if the package been exported to configurable directory of shared folder|S3
         and local downloading functionality (depends on worker configuration
     """
     _log.info('Start running test: %s', test_export_on_storage.__name__)
@@ -170,8 +171,8 @@ def test_export_on_storage():
         f'Test: [{test_export_on_storage.__name__}] Failed: File not exist or failure on loading request json'
 
     request = (json.loads(request))
-    request['fileName'] = config.EXPORT_DOWNLOAD_FILE_NAME
-    request['directoryName'] = config.EXPORT_DOWNLOAD_DIR_NAME
+    request['fileName'] = 'test_case_8_exporter_api'
+    # request['directoryName'] = config.EXPORT_DOWNLOAD_DIR_NAME
 
     # start trigger export
     s_code, content = exc.send_export_request(json.dumps(request))
@@ -198,40 +199,59 @@ def test_export_on_storage():
     assert gpkg_exist, \
         f'Test: [{test_export_on_storage.__name__}] Failed: file not exist on storage [disk | S3 ]:[{pkg_url}]'
 
+    _log.info('Finish running test: %s', test_export_on_storage.__name__)
+
+
+def test_download_package():
+    """ 9. Test case:Download locally orthophoto geopackage from shared storage.
+        -----------------------------------------------------------------------------
+        Validate requirement 7+11 – server side – 1 Export API
+        -----------------------------------------------------------------------------
+        This test validates that export process provide download url and able to download locally
+    """
+    _log.info('Start running test: %s', test_download_package.__name__)
+
+    """ Prerequisites - creating export package to test download process"""
+    # prepare request
+    request = request_sampels.get_request_by_box_size(request_sampels.box_size.Sanity)
+    assert request, \
+        f'Test: [{test_download_package.__name__}] Failed: File not exist or failure on loading request json'
+    request = (json.loads(request))
+    request['fileName'] = config.EXPORT_DOWNLOAD_FILE_NAME
+    request['directoryName'] = config.EXPORT_DOWNLOAD_DIR_NAME
+
+    # start trigger export
+    s_code, content = exc.send_export_request(json.dumps(request))
+
+    assert s_code == config.ResponseCode.Ok.value, \
+        f'Test: [{test_download_package.__name__}] Failed: Exporter trigger return status code [{s_code}]'
+
+    # check exporting process and wait till end with results
+    res = None
+    try:
+        res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+        uuids.append(content['uuid'])
+    except Exception as e:
+        err = str(e)
+    assert res, \
+        f'Test: [{test_download_package.__name__}] Failed: on follow (worker stage) with message: [{err}]'
+
     # store data for download test
     ValueStorage.gpkg_download_url = res['fileURI']
     ValueStorage.file_name = request['fileName']
     ValueStorage.directory_name = request['directoryName']
 
-    # exc.delete_requests(config.EXPORT_STORAGE_URL, [content['uuid']])
-    _log.info('Finish running test: %s', test_export_on_storage.__name__)
-
-
-def test_download_package():
-    """ Test case: Download locally package from shared storage
-
-        Validate epic 4 – server side – requirement 5
-
-        This test validates that geoPackage that was created on storage can be downloaded locally and valid as original
-    """
-    _log.info('Start running test: %s', test_download_package.__name__)
-
+    """Test download actual flow"""
     #  validate exported file exist on storage from previous test - test_export_on_storage
     _log.info(ValueStorage.gpkg_download_url)
     assert ValueStorage.gpkg_download_url, \
         f'Test: [{test_download_package.__name__}] Failed: Download URI not found!]'
-    # pkg_url = common.combine_url(config.PACKAGE_OUTPUT_DIR, config.EXPORT_DOWNLOAD_DIR_NAME,
-    #                              ".".join([config.EXPORT_DOWNLOAD_FILE_NAME, config.PACKAGE_EXT]))
-    # assert os.path.exists(pkg_url), print("File not exist on storage %s" % pkg_url)
 
-    #  send and receive download file request
     s_code, downloaded_data = exc.send_download_request(ValueStorage.gpkg_download_url)
     assert s_code == config.ResponseCode.Ok.value, \
         f'Test: [{test_download_package.__name__}] Failed: Download request failed with status code: [{s_code}])'
-    orig_exported = exc.load_gpkg_from_storage(ValueStorage.file_name, ValueStorage.directory_name)
-    #  compare downloaded and exported files by hashing
-    # orig_exported = exc.common.load_file_as_bytearray(pkg_url)  # bytes array
 
+    orig_exported = exc.load_gpkg_from_storage(ValueStorage.file_name, ValueStorage.directory_name)
     fp_orig = common.generate_unique_fingerprint(orig_exported)
     fp_downloaded = common.generate_unique_fingerprint(downloaded_data)
     assert fp_orig == fp_downloaded, \
@@ -240,10 +260,100 @@ def test_download_package():
     _log.info('Finish running test: %s', test_download_package.__name__)
 
 
+def test_export_by_lod():
+    """ 12. Test case: send export request by zoom level (LOD – level of details)
+        -----------------------------------------------------------------------------
+        Validate requirement 7+11 – server side – 1 Export API
+        -----------------------------------------------------------------------------
+        This test sending export requests by different max zoom level.
+    """
+    _log.info('Start running test: %s', test_export_by_lod.__name__)
+
+    request = request_sampels.get_lod_req(request_sampels.ZoomLevels.default)
+    assert request, \
+        f'Test: [{test_export_by_lod.__name__}] Failed: File not exist or failure on loading request json'
+    request = (json.loads(request))
+    request['fileName'] = 'test_case_12_exporter_api_ZoomDefault'
+
+    # start trigger export
+    s_code, content = exc.send_export_request(json.dumps(request))
+
+    assert s_code == config.ResponseCode.Ok.value, \
+        f'Test: [{test_export_by_lod.__name__}] Failed: Exporter trigger return status code [{s_code}]'
+
+    # check exporting process and wait till end with results
+    res = None
+    try:
+        res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+        uuids.append(content['uuid'])
+    except Exception as e:
+        err = str(e)
+    assert res, \
+        f'Test: [{test_export_by_lod.__name__}] Failed: on follow (worker stage) with message: [{err}]'
+
+    # check geopackage file was created on storage
+    file_location = res['fileURI']
+    _log.debug(f'File uri expected: {file_location}')
+
+    gpkg_exist, pkg_url = exc.is_geopackage_exist(file_location, request=request)
+
+    assert gpkg_exist, \
+        f'Test: [{test_export_by_lod.__name__}] Failed: file not exist on storage [disk | S3 ]:[{pkg_url}]'
+
+    # validate the package was created properly
+    is_valid_zoom = exc.validate_zoom_level(pkg_url, request['maxZoom'])
+    assert is_valid_zoom, \
+        f'Test: [{test_export_by_lod.__name__}] Failed: package is corrupted or wrong max zoom data[{pkg_url}]'
+
+    request = request_sampels.get_lod_req(request_sampels.ZoomLevels.med)
+    assert request, \
+        f'Test: [{test_export_by_lod.__name__}] Failed: File not exist or failure on loading request json'
+    request = (json.loads(request))
+    request['fileName'] = 'test_case_12_exporter_api_ZoomMed'
+
+    # start trigger export
+    s_code, content = exc.send_export_request(json.dumps(request))
+
+    assert s_code == config.ResponseCode.Ok.value, \
+        f'Test: [{test_export_by_lod.__name__}] Failed: Exporter trigger return status code [{s_code}]'
+
+    # check exporting process and wait till end with results
+    res = None
+    try:
+        res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+        uuids.append(content['uuid'])
+    except Exception as e:
+        err = str(e)
+    assert res, \
+        f'Test: [{test_export_by_lod.__name__}] Failed: on follow (worker stage) with message: [{err}]'
+
+    # check geopackage file was created on storage
+    file_location = res['fileURI']
+    _log.debug(f'File uri expected: {file_location}')
+
+    gpkg_exist, pkg_url = exc.is_geopackage_exist(file_location, request=request)
+
+    assert gpkg_exist, \
+        f'Test: [{test_export_by_lod.__name__}] Failed: file not exist on storage [disk | S3 ]:[{pkg_url}]'
+
+    # validate the package was created properly
+    is_valid_zoom = exc.validate_zoom_level(pkg_url, request['maxZoom'])
+    assert is_valid_zoom, \
+        f'Test: [{test_export_by_lod.__name__}] Failed: package is corrupted or wrong max zoom data[{pkg_url}]'
+
+
+def setup_module(module):
+    storage_type = "Object storage" if config.S3_EXPORT_STORAGE_MODE else 'File system'
+    _log.info(f'Current environment of testing:\n'
+              f'Exporter tools service test\n'
+              f'Storage S3: {storage_type}\n'
+              )
+
+
 def teardown_module(module):
-    # exc.clear_all_tasks(config.EXPORT_STORAGE_URL)
+    # exc.clear_all_tasks(config.EXPORT_STORAGE_URL) # this function remove all statuses from storage
     exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
-    print("environment was cleaned up")
+    print("\nenvironment was cleaned up")
 
 # example for future implementation of async tests
 # @pytest.mark.asyncio
@@ -257,4 +367,6 @@ def teardown_module(module):
 # test_box_size_limit()
 # test_export_on_storage()
 # test_download_package()
+# exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
+# test_export_by_lod()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)

@@ -159,6 +159,29 @@ def load_gpkg_from_storage(file_name, directory_name):
     pkg = common.load_file_as_bytearray(uri)
     return pkg
 
+
+def validate_zoom_level(uri, max_zoom_level):
+    if config.S3_EXPORT_STORAGE_MODE:
+        s3_conn = s3.S3Client(config.S3_END_POINT, config.S3_ACCESS_KEY, config.S3_SECRET_KEY)
+        object_key = "/".join(uri.split("/")[-2:])
+
+        destination_dir = os.path.join(config.S3_DOWNLOAD_DIRECTORY, object_key.split('.')[0])
+        if not os.path.exists(destination_dir):
+            os.makedirs(destination_dir)
+
+        s3_conn.download_from_s3(config.S3_BOCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
+        uri = os.path.join(destination_dir, destination_dir.split('/')[-1])
+    else: #FS
+        if not os.path.exists(config.PACKAGE_OUTPUT_DIR):
+            _logger.error(
+                "Output directory not exist [%s]- validate mapping and directory on config" % (config.PACKAGE_OUTPUT_DIR))
+            raise Exception("Output directory: [%s] not found ! validate config \ mapping" % (config.PACKAGE_OUTPUT_DIR))
+
+    res = gpv.validate_zoom_levels(uri, max_zoom_level)
+    res = set(res)
+    return max(res) <= max_zoom_level
+
+
 def validate_geo_package(uri):
     """
     This method check if geopackage was created properly. can provide uuid or response
