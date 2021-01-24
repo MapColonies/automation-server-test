@@ -22,6 +22,9 @@ docs/_build
 /venv
 /samples
 /docker_images
+/run_locally.sh
+/build.sh
+
 
 venv
 samples

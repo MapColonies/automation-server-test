@@ -96,13 +96,13 @@ def test_box_size_limit():
     # sending requests with different bbox sizes
     s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big")
     assert config.ResponseCode.ValidationErrors.value == s_code and content[
-        'name'] == config.BOX_LIMIT_ERROR, "limit box test failed"
-    # if not os.environ.get('DEV_MODE'):  # on QA environment the limit size can be changes and its to prevent overload
-    #     request = request_sampels.get_request_by_box_size(request_sampels.box_size.Medium)
-    #     assert request
-    #     s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_medium')
-    #     assert config.ResponseCode.ValidationErrors.value == s_code and content[
-    #         'name'] == config.BOX_LIMIT_ERROR, "limit box test failed"
+        'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.box_size.Medium}] test failed"
+    if config.ENVIRONMENT_NAME == 'qa':  # on QA environment the limit size can be changes and its to prevent overload
+        request = request_sampels.get_request_by_box_size(request_sampels.box_size.Medium)
+        assert request
+        s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_medium')
+        assert config.ResponseCode.ValidationErrors.value == s_code and content[
+            'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.box_size.Medium}] test failed"
 
     request = request_sampels.get_request_by_box_size(request_sampels.box_size.Sanity)
     assert request
@@ -346,7 +346,8 @@ def setup_module(module):
     storage_type = "Object storage" if config.S3_EXPORT_STORAGE_MODE else 'File system'
     _log.info(f'Current environment of testing:\n'
               f'Exporter tools service test\n'
-              f'Storage S3: {storage_type}\n'
+              f'Storage mode: {storage_type}\n'
+              f'Testing environment: {config.ENVIRONMENT_NAME}\n'
               )
 
 
@@ -370,3 +371,4 @@ def teardown_module(module):
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
 # test_export_by_lod()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
+exc.create_testing_status('hghjg', 'e_tests', 'r_short.GPKG')

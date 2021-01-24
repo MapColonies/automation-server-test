@@ -110,7 +110,7 @@ class S3Client(object): # todo - validate with no parenthesis on pylint
                                                                                  'Key': object_key},
                                                                          ExpiresIn=config.S3_DOWNLOAD_EXPIRATION_TIME)
 
-    def  is_file_exist(self, bucket_name, object_key):
+    def is_file_exist(self, bucket_name, object_key):
         if not self._resource.Bucket(bucket_name) in self._resource.buckets.all():
             _log.debug('Bucket with name: [%s] not exist on s3' % bucket_name)
             return False

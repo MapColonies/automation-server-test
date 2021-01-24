@@ -43,4 +43,25 @@ This code provide tests that validate and testing entire tools provided for Map 
         4. ``S3_BUCKET_NAME=<relevant bucket>``
         5. ``S3_DOWNLOAD_DIR=<temp directory> - as default ->/tmp/``
    5. In case running test with File system option\
-   ``OUTPUT_EXPORT_PATH=<relevant directory mounted to worker's output dir - relative>``
+   ``OUTPUT_EXPORT_PATH=<relevant directory mounted to worker's output dir - relative>``\
+ 
+|  Variable   | Value       | Mandatory   |   Default   |
+| :----------- | :-----------: | :-----------: | :-----------: |
+| SERVICES_URL | QA \ DEV \ PROD | + | QA | 
+| EXPORTER_PORT   | for dev mode [trigger api port]        | + | 8081 | 
+| STORAGE_PORT   | for dev mode [export status api port]        | + | 8080 | 
+| DOWNLOAD_PORT   | for dev mode [download service api port]        | in case of File system mode | 8082 | 
+| MAX_EXPORT_RUNNING_TIME   | integer represent min for run timeout        | - | 5 | 
+| OUTPUT_EXPORT_PATH   | geopackage output dir | in case of File system mode | /opt/output | 
+| DEBUG_LOGS | 1 for debug logs | - | None | 
+| FILE_LOGS | 1 for logs file output | - | None | 
+| LOGS_OUTPUT | 1 for logs file output | in case of FILE_LOGS=1 | /tmp/mc_logs |
+| BEST_LAYER_URL   | relevant layer url | + | provided on exported chart | 
+| SOURCE_LAYER | source layer name | + | provided on exported chart |
+| S3_EXPORT_STORAGE_MODE   | true for object storage mode | in case of prod environment(openshift) | False | 
+| S3_DOWNLOAD_DIR | valid directory downloading data from S3 | in case of S3 mode | /tmp | 
+| S3_BUCKET_NAME | export output bucket name | in case of S3 mode | provided from secret | 
+| S3_ACCESS_KEY | AWS access key | in case of S3 mode | provided from secret |
+| S3_SECRET_KEY | AWS secret key | in case of S3 mode | provided from secret | 
+| S3_END_POINT | Storage procided endpoint | in case of S3 mode | provided from secret | 
+

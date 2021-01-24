@@ -148,7 +148,7 @@ def load_gpkg_from_storage(file_name, directory_name):
         if not os.path.exists(destination_dir):
             os.makedirs(destination_dir)
 
-        s3_conn.download_from_s3(config.S3_BOCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
+        s3_conn.download_from_s3(config.S3_BUCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
         uri = os.path.join(destination_dir, destination_dir.split('/')[-1])
 
 
@@ -169,7 +169,7 @@ def validate_zoom_level(uri, max_zoom_level):
         if not os.path.exists(destination_dir):
             os.makedirs(destination_dir)
 
-        s3_conn.download_from_s3(config.S3_BOCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
+        s3_conn.download_from_s3(config.S3_BUCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
         uri = os.path.join(destination_dir, destination_dir.split('/')[-1])
     else: #FS
         if not os.path.exists(config.PACKAGE_OUTPUT_DIR):
@@ -196,7 +196,7 @@ def validate_geo_package(uri):
         if not os.path.exists(destination_dir):
             os.makedirs(destination_dir)
 
-        s3_conn.download_from_s3(config.S3_BOCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
+        s3_conn.download_from_s3(config.S3_BUCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
         uri = os.path.join(destination_dir, destination_dir.split('/')[-1])
     else: #FS
         if not os.path.exists(config.PACKAGE_OUTPUT_DIR):
@@ -242,6 +242,7 @@ def create_testing_status(url, directory_name, fileName):
         'directoryName': directory_name,
         'fileURI': common.combine_url(config.DOWNLOAD_STORAGE_URL, config.DOWNLOAD_API, directory_name, fileName),
         'progress': 100,
+        'sourceLayer': config.SOURCE_LAYER,
         'status': config.EXPORT_STATUS_COMPLITED,
         "geometry": {
             "type": "Polygon",
@@ -302,7 +303,7 @@ def is_geopackage_exist(file_url, request=None, test_name="test name N\A"):
             request = json.loads(request)
         object_key = ".".join([request['fileName'], config.PACKAGE_EXT])
         object_key = "/".join([request['directoryName'], object_key])
-        res = s3_conn.is_file_exist(config.S3_BOCKET_NAME, object_key)
+        res = s3_conn.is_file_exist(config.S3_BUCKET_NAME, object_key)
         pkg_url = file_url.split('?')[0] if '?' in file_url else file_url # todo - update after download link will be
         return res, pkg_url
 

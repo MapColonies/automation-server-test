@@ -13,7 +13,17 @@ class ResponseCode(enum.Enum):
     DuplicatedError = 409  # in case of requesting package with same name already exists
 
 
+class EnvironmentTypes(enum.Enum):
+    """
+    Types of environment.
+    """
+    QA = 1
+    DEV = 2
+    PROD = 3
 
+############      environment     ############
+ENVIRONMENT_NAME = common.get_environment_variable('ENVIRONMENT_NAME', 'dev')
+##############################################
 
 ###########      error massages     ##########
 BOX_LIMIT_ERROR = 'ERR_BBOX_AREA_TOO_LARGE'
@@ -27,6 +37,7 @@ EXPORTER_PORT = common.get_environment_variable('EXPORTER_PORT', "8081")
 STORAGE_PORT = common.get_environment_variable('STORAGE_PORT', "8080")
 DOWNLOAD_PORT = common.get_environment_variable('DOWNLOAD_PORT', "8082")
 BASE_SERVICES_URL = common.get_environment_variable('SERVICES_URL', "http://10.45.128.8")
+# BASE_SERVICES_URL = common.get_environment_variable('SERVICES_URL', "http://10.45.128.8")
 # BASE_SERVICES_URL = "http://10.28.11.49"
 ###########################################################################
 
@@ -67,10 +78,22 @@ EXPORT_DOWNLOAD_FILE_NAME = common.get_environment_variable('TEST_PKG_NAME', 'te
 S3_EXPORT_STORAGE_MODE = common.get_environment_variable('S3_EXPORT_STORAGE_MODE', False )
 S3_DOWNLOAD_EXPIRATION_TIME = common.get_environment_variable("S3_DOWNLOAD_EXPIRED_TIME", 3600)
 S3_DOWNLOAD_DIRECTORY = common.get_environment_variable('S3_DOWNLOAD_DIR', '/tmp/')
-S3_BOCKET_NAME = common.get_environment_variable('S3_BUCKET_NAME', 'test')
-S3_ACCESS_KEY = common.get_environment_variable('S3_ACCESS_KEY', 'AKIAIOSFODNN7EXAMPLE')
-S3_SECRET_KEY = common.get_environment_variable('S3_SECRET_KEY', 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY')
-S3_END_POINT = common.get_environment_variable('S3_END_POINT', 'http://localhost:9000/minio')
+S3_BUCKET_NAME = common.get_environment_variable('S3_BUCKET_NAME', None)
+S3_ACCESS_KEY = common.get_environment_variable('S3_ACCESS_KEY', None)
+S3_SECRET_KEY = common.get_environment_variable('S3_SECRET_KEY', None)
+S3_END_POINT = common.get_environment_variable('S3_END_POINT', None)
+
+if S3_EXPORT_STORAGE_MODE:
+    if not S3_BUCKET_NAME:
+        raise Exception('S3_BUCKET_NAME while running on S3 mode')
+    elif not S3_ACCESS_KEY:
+        raise Exception('S3_ACCESS_KEY while running on S3 mode')
+    elif not S3_SECRET_KEY:
+        raise Exception('S3_SECRET_KEY while running on S3 mode')
+    elif not S3_END_POINT:
+        raise Exception('S3_SECRET_KEY while running on S3 mode')
+
+
 
 
 
