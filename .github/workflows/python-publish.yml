@@ -15,7 +15,7 @@ jobs:
     - name: setup version
       run: |
           ./generate_version.sh
-          echo ::set-env name=TAG_NAME::$(cat version.txt | grep -Po '(?<=version>).*(?=</version>)')
+          echo ::set-env name=TAG_NAME::$(source version.txt | echo $version)
           cat version.txt
       
     - name: Configure AWS credentials
