@@ -1,5 +1,5 @@
 #!/bin/bash
-VER=$(python setup.py --version | sed 's/+/./g')
+VER=$(python3 setup.py --version | sed 's/+/./g')
 
 echo $(date):automation-test:$VER
 
