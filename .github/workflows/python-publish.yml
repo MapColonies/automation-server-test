@@ -15,7 +15,7 @@ jobs:
     - name: setup version
       run: |
           ./generate_version.sh
-          echo ::set-env name=TAG_NAME::$(source version.txt | echo $version)
+          echo "::set-env name=TAG_NAME::$(source version.txt | echo $version)"
           cat version.txt
       
     - name: Configure AWS credentials
@@ -35,6 +35,6 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
         VERSION: ${{ env.TAG_NAME }}
       run: |
-        echo $VERSION
+        
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
