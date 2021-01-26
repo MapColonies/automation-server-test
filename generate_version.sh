@@ -1,4 +1,5 @@
 #!/bin/bash
+pip3 install setuptools setuptools_scm
 VER=$(python3 setup.py --version | sed 's/+/./g')
 
 echo $(date):automation-test:$VER
