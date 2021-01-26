@@ -15,7 +15,8 @@ jobs:
     - name: setup version
       run: |
           ./generate_version.sh
-          echo "::set-env name=TAG_NAME::$(source version.txt | echo $version)"
+          #echo "::set-env name=TAG_NAME::$(source version.txt | echo $version)"
+          echo "::set-env name=TAG_NAME::'0.1.dev1.g70c1424'"
           echo $TAG_NAME
       
     - name: Configure AWS credentials
