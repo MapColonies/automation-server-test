@@ -35,6 +35,6 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
         VERSION: ${{ env.TAG_NAME }}
       run: |
-        export VERSION=${source version.txt | echo $version}
+        export VERSION=$(source version.txt | echo $version)
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
