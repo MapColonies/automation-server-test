@@ -16,6 +16,7 @@ jobs:
       run: |
           ./generate_version.sh
           echo ::set-env name=TAG_NAME::$(cat version.txt | grep -Po '(?<=version>).*(?=</version>)')
+          echo $TAG_NAME
       
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
