@@ -1,9 +1,11 @@
 name: CI
 
-on: [pull_request]
 
+on:
+  push:
+    tags:
+      - '*'
 jobs:
-
 
   build_and_test:
     runs-on: ubuntu-latest

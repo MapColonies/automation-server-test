@@ -1,5 +1,5 @@
 requests
 boto3
 pytest
-gpval==0.0.10
+gpval
 wheel
