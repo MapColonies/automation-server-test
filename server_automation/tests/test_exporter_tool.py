@@ -2,11 +2,8 @@
 
 """
 import pytest
-import os
 import json
 import logging
-# os.environ['DEV_MODE'] = 'True'
-# os.environ['DEBUG_LOGS'] = 'True'
 from server_automation.tests import request_sampels
 from server_automation.functions import executors as exc
 from server_automation.configuration import config

@@ -17,6 +17,7 @@ ENV VERSION=$VERSION
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=$VERSION
 
 # copy from local disk to container - to path /source_code
+
 COPY . .
 # install source code as local package
 RUN pip3 install --upgrade .
@@ -27,3 +28,4 @@ RUN chmod +x start.sh && chown -R app:app /opt/output && chown -R app:app /opt/l
 USER app:app
 # cmd to run
 CMD ["/bin/sh","-c", "/source_code/start.sh"]
+
