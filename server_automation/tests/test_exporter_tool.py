@@ -368,4 +368,4 @@ def teardown_module(module):
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
 # test_export_by_lod()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
-exc.create_testing_status('hghjg', 'e_tests', 'r_short.GPKG')
+# exc.create_testing_status('hghjg', 'e_tests', 'r_short.GPKG')

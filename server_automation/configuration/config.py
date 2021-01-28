@@ -63,7 +63,7 @@ EXPORT_STATUS_FAILED = "Failed"
 # EXPORT_REQUEST_PATH = "/home/ronenk1/dev/server/samples/request_short.json"
 
 ################################## timings ###################################
-MAX_EXPORT_RUNNING_TIME = 60 * common.get_environment_variable('MAX_EXPORT_RUNNING_TIME', 5)  # min
+MAX_EXPORT_RUNNING_TIME = 60 * common.get_environment_variable('MAX_EXPORT_RUNNING_TIME', 1)  # min
 
 # PACKAGE_OUTPUT_DIR = '/mnt/outputs'
 # PACKAGE_OUTPUT_DIR = '/mnt/exporter-worker/outputs'
