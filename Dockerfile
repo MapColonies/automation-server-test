@@ -9,13 +9,14 @@ ARG VERSION=0.0.0
 ENV VERSION=$VERSION
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=$VERSION
 
+RUN python3 -m pip install --upgrade pip
 RUN apk update -q --no-cache \
     && apk add -q --no-cache python3 py3-pip
-RUN pip3 install setuptools_scm
+RUN pip3 install --upgrade setuptools_scm
 
 COPY . .
 
-RUN pip3 install .
+RUN pip3 install --upgrade .
 RUN apk del py3-pip
 
 # ENV PYTHONPATH=${PYTHONPATH}:'/source_code'
