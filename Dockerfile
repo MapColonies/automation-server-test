@@ -1,29 +1,29 @@
+# Base image to use
 FROM python:3.6-alpine3.12
+# add user: app and group app - application user
 RUN addgroup -S app && adduser -S app -G app
-
-RUN mkdir /opt/output
-RUN mkdir /opt/logs
+# update alpine OS and install python3 and pip3
+RUN apk update -q --no-cache \
+    && apk add -q --no-cache python3 py3-pip
+# upgrade setuptools_scm
+RUN pip3 install --upgrade setuptools_scm
+# create app directories
+RUN mkdir /opt/output && mkdir /opt/logs
+# setup workdir
 WORKDIR /source_code
-
+# env arguments for versioning
 ARG VERSION=0.0.0
 ENV VERSION=$VERSION
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=$VERSION
 
-RUN python3 -m pip install --upgrade pip
-RUN apk update -q --no-cache \
-    && apk add -q --no-cache python3 py3-pip
-RUN pip3 install --upgrade setuptools_scm
-
+# copy from local disk to container - to path /source_code
 COPY . .
-
+# install source code as local package
 RUN pip3 install --upgrade .
-RUN apk del py3-pip
+# app permissions
+RUN chmod +x start.sh && chown -R app:app /opt/output && chown -R app:app /opt/logs
 
-# ENV PYTHONPATH=${PYTHONPATH}:'/source_code'
-
-RUN chmod +x start.sh
-
-RUN chown -R app . && chown -R app /opt/output
+# sets the user to run the application with: "app"
 USER app:app
-
-CMD ["sh", "start.sh"]
+# cmd to run
+CMD ["/bin/sh","-c", "/source_code/start.sh"]
