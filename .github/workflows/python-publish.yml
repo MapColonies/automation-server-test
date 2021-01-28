@@ -4,6 +4,7 @@ on: [pull_request]
 
 jobs:
 
+
   build_and_test:
     runs-on: ubuntu-latest
     env: 
@@ -14,7 +15,10 @@ jobs:
     - name: setup version
       run: |
           ./generate_version.sh
-          echo ::set-env name=TAG_NAME::$(cat version.txt | grep -Po '(?<=version>).*(?=</version>)')
+          
+    - name: Print version
+      run: |
+          echo "the version is:"  ${{ env.TAG_NAME }}
       
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -29,9 +33,8 @@ jobs:
     - name: Build, tag, and push image to Amazon ECR
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        ECR_REPOSITORY: ${{ github.event.repository.name }}
         IMAGE_TAG: ${{ github.sha }}
-        VERSION: ${{ env.TAG_NAME }}
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$VERSION
+        docker build --no-cache --network=host -t $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_NAME .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_NAME
