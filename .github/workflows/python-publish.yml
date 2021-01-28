@@ -36,5 +36,6 @@ jobs:
         ECR_REPOSITORY: ${{ github.event.repository.name }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
+        curl https://pypi.org
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_NAME .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_NAME
