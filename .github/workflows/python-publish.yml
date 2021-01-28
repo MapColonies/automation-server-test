@@ -15,8 +15,10 @@ jobs:
     - name: setup version
       run: |
           ./generate_version.sh
-          echo "::set-env name=TAG_NAME::$(source version.txt | echo $version)"
-          echo $TAG_NAME
+          echo $PWD
+    - name: Print version
+      run: |
+          echo "the version is ${{ env.TAG_NAME }}
       
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
