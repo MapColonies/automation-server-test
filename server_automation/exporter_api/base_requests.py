@@ -16,7 +16,7 @@ def send_post_request(url, body, header=None):
             return resp
         except Exception as e:
             _log.error('failed get response with error: %s' % (str(e)))
-            raise Exception("failed on getting response data from get response with error message: %s" % (str(e)))
+            raise Exception("failed on getting response data from get response with error message: %s", (str(e)))
 
 
 def send_get_request(url, header=None):
@@ -32,6 +32,6 @@ def send_get_request(url, header=None):
 
         except Exception as e:
             _log.error('failed get response with error: %s' % (str(e)))
-            raise Exception("failed on getting response data from get response with error message: %s" , str(e))
+            raise Exception("failed on getting response data from get response with error message: %s", str(e))
 
 
