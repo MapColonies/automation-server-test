@@ -53,9 +53,9 @@ This code provide tests that validate and testing entire tools provided for Map 
 | DOWNLOAD_PORT   | for dev mode [download service api port]        | in case of File system mode | 8082 | 
 | MAX_EXPORT_RUNNING_TIME   | integer represent min for run timeout        | - | 5 | 
 | OUTPUT_EXPORT_PATH   | geopackage output dir | in case of File system mode | /opt/output | 
-| DEBUG_LOGS | 1 for debug logs | - | None | 
-| FILE_LOGS | 1 for logs file output | - | None | 
-| LOGS_OUTPUT | 1 for logs file output | in case of FILE_LOGS=1 | /tmp/mc_logs |
+| DEBUG_LOGS | any value for debug logs | - | None | 
+| FILE_LOGS | any value for logs file output | - | None | 
+| LOGS_OUTPUT | permitted directory for logs file output | in case of FILE_LOGS=1 | /tmp/mc_logs |
 | BEST_LAYER_URL   | relevant layer url | + | provided on exported chart | 
 | SOURCE_LAYER | source layer name | + | provided on exported chart |
 | S3_EXPORT_STORAGE_MODE   | true for object storage mode | in case of prod environment(openshift) | False | 

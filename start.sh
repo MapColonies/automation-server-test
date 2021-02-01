@@ -1,5 +1,5 @@
 #!/bin/sh
-export FILE_LOGS=1 # remove to avoid logging to file - will print only to console
+#export FILE_LOGS=1 # remove to avoid logging to file - will print only to console
 if [ "$CLEAN_UP" = true ]
 then
     echo "<<<<____CLEAN UP IN PROGRESS____>>>>"
