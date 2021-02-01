@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "automation-server-test.fullname" . }}-flower
+  {{- if .Values.global.annotations }}
+  annotations:
+    {{- toYaml .Values.global.annotations | nindent 4 }}
+  {{- end }}
+  labels:
+    app: {{ include "automation-server-test.labels.app" . }}
+    component: automation-server-test
+    chart: {{ include "automation-server-test.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.global.replicas }}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ include "automation-server-test.labels.app" . }}
+      component: automation-server-test
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+      {{- if .Values.global.annotations }}
+        {{- toYaml .Values.global.annotations | nindent 4 }}
+      {{- end }}
+      labels:
+        app: {{ include "automation-server-test.labels.app" . }}
+        component: automation-server-test
+        release: {{ .Release.Name }}
+        {{- if .Values.global.podLabels }}
+          {{- toYaml .Values.global.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.global.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.global.pullSecret }}
+      {{- end }}
+      restartPolicy: Always
+      {{- if .Values.global.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.global.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.global.affinity }}
+      affinity:
+        {{- toYaml .Values.global.affinity | nindent 8 }}
+      {{- end }}
+      {{- if .Values.global.tolerations }}
+      tolerations:
+        {{- toYaml .Values.global.tolerations | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "automation-server-test.serviceAccountName" . }}
+      {{- if .Values.global.securityContext }}
+      securityContext:
+        {{- toYaml .Values.global.securityContext | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-automation-server-test
+          image: {{ .Values.global.image }}:{{ .Values.global.tag }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: "{{ include "automation-server-test.fullname" . }}-env"
+          env:
+            {{- include "automation-server-test.mapenvsecrets" . | indent 12 }}
+          ports:
+            - name: automation-server-test
+              containerPort: 8080
+              protocol: TCP
+          {{- if .Values.global.extraConfigmapMounts }}
+          volumeMounts:
+            {{- range .Values.global.extraConfigmapMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              readOnly: {{ .readOnly }}
+              {{- if .subPath }}
+              subPath: {{ .subPath }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+          command:
+            - "/bin/sh"
+          args:
+            - "-c"
+            - "/source_code/start.sh"
+          resources:
+            {{- toYaml .Values.global.resources | nindent 12 }}
+      {{- if .Values.global.extraConfigmapMounts }}
+      volumes:
+        {{- range .Values.global.extraConfigmapMounts }}
+        - name: {{ .name }}
+          configMap:
+            name: {{ .configMap }}
+        {{- end }}
+      {{- end }}

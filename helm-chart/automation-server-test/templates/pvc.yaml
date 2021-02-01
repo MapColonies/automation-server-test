@@ -1,0 +1,24 @@
+{{- if and (.Values.app.logs.persistence.enabled) (not .Values.app.logs.persistence.existingClaim) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "automation-server-test.fullname" . }}
+  labels:
+    app: {{ include "automation-server-test.labels.app" . }}
+    chart: {{ include "automation-server-test.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  accessModes:.dags
+    - {{ .Values.app.logs.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.app.logs.persistence.size | quote }}
+  {{- if .Values.app.logs.persistence.storageClass }}
+  {{- if (eq "-" .Values.app.logs.persistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{ .Values.app.logs.persistence.storageClass }}"
+  {{- end }}
+  {{- end }}
+  {{- end }}
