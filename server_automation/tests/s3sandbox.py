@@ -1,9 +1,12 @@
-from server_automation.utils import s3storage
+# pylint: disable-all
+""" Test file not for deploy """
 import os
-MINIO_ACCESS_KEY='AKIAIOSFODNN7EXAMPLE'
-MINIO_SECRET_KEY='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+from server_automation.utils import s3storage
+
+MINIO_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE'
+MINIO_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
 endpoint_url = 'http://localhost:9000/minio/'
-BUCKET='test2'
+BUCKET = 'test2'
 full_path = '/home/ronenk1/dev/automation-server-test/samples/request_sanity.json'
 
 sreader = s3storage.S3Client(endpoint_url, MINIO_ACCESS_KEY, MINIO_SECRET_KEY)

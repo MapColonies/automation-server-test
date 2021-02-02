@@ -1,5 +1,8 @@
-requests
-boto3
-pytest
+requests~=2.25.0
+boto3~=1.16.43
+pytest~=6.1.2
 gpval
 wheel
+botocore
+setuptools~=50.3.2
+botocore~=1.19.43

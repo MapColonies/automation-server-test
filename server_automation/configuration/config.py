@@ -1,5 +1,7 @@
+# pylint: disable=line-too-long
+"""configuration interface"""
 import enum
-from server_automation.utils import common as common
+from server_automation.utils import common
 
 
 class ResponseCode(enum.Enum):
@@ -20,6 +22,7 @@ class EnvironmentTypes(enum.Enum):
     QA = 1
     DEV = 2
     PROD = 3
+
 
 ############      environment     ############
 ENVIRONMENT_NAME = common.get_environment_variable('ENVIRONMENT_NAME', 'dev')
@@ -73,9 +76,8 @@ PACKAGE_OUTPUT_DIR = common.get_environment_variable('OUTPUT_EXPORT_PATH', '/hom
 EXPORT_DOWNLOAD_DIR_NAME = common.get_environment_variable('TEST_DIR_NAME', 'download_test')
 EXPORT_DOWNLOAD_FILE_NAME = common.get_environment_variable('TEST_PKG_NAME', 'test_case_9_exporter_api')
 
-
 ############################### S3 ############################################
-S3_EXPORT_STORAGE_MODE = common.get_environment_variable('S3_EXPORT_STORAGE_MODE', False )
+S3_EXPORT_STORAGE_MODE = common.get_environment_variable('S3_EXPORT_STORAGE_MODE', False)
 S3_DOWNLOAD_EXPIRATION_TIME = common.get_environment_variable("S3_DOWNLOAD_EXPIRED_TIME", 3600)
 S3_DOWNLOAD_DIRECTORY = common.get_environment_variable('S3_DOWNLOAD_DIR', '/tmp/')
 S3_BUCKET_NAME = common.get_environment_variable('S3_BUCKET_NAME', None)
@@ -83,6 +85,7 @@ S3_ACCESS_KEY = common.get_environment_variable('S3_ACCESS_KEY', None)
 S3_SECRET_KEY = common.get_environment_variable('S3_SECRET_KEY', None)
 S3_END_POINT = common.get_environment_variable('S3_END_POINT', None)
 
+# pylint: disable=no-else-raise
 if S3_EXPORT_STORAGE_MODE:
     if not S3_BUCKET_NAME:
         raise Exception('S3_BUCKET_NAME while running on S3 mode')
@@ -93,14 +96,10 @@ if S3_EXPORT_STORAGE_MODE:
     elif not S3_END_POINT:
         raise Exception('S3_SECRET_KEY while running on S3 mode')
 
-
-
-
-
-
 ############################ AUTOMATION DEV ENVIRONMENT VARIABLE ##############
+# pylint: disable=fixme
 DEV_MODE = common.get_environment_variable('DEV_MODE', True)  # todo when will be qa environment should be replaced False
 
-BEST_LAYER_URL = common.get_environment_variable('BEST_LAYER', "http://10.28.11.95:8080/service?REQUEST=GetMap&SERVICE=WMS&LAYERS=combined_layers")
+BEST_LAYER_URL = common.get_environment_variable('BEST_LAYER',
+                                                 "http://10.28.11.95:8080/service?REQUEST=GetMap&SERVICE=WMS&LAYERS=combined_layers")
 SOURCE_LAYER = common.get_environment_variable('SOURCE_LAYER', 'combined_layers')
-

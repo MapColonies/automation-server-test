@@ -1,20 +1,21 @@
+# pylint: disable=line-too-long,invalid-name
+"""This module provide usefull class that wrapping S3 and provide basic functionality [read and write] with S3 objects"""
 import os
+import logging
 import boto3
 import botocore
-from server_automation.configuration import config as config
-
-import logging
+from server_automation.configuration import config
 
 _log = logging.getLogger('server_automation.utils.s3storage')
 
 
-class S3Client(object): # todo - validate with no parenthesis on pylint
+class S3Client:
     """
     This class implements s3 functionality
     """
-
+    # pylint: disable=fixme
     def __init__(self, endpoint_url, aws_access_key_id, aws_secret_access_key):
-        if 'minio' in endpoint_url: # todo - refactor as validation check
+        if 'minio' in endpoint_url:  # todo - refactor as validation check
             endpoint_url = endpoint_url.split('minio')[0]
         self._endpoint_url = endpoint_url
         self._aws_access_key_id = aws_access_key_id
@@ -90,8 +91,8 @@ class S3Client(object): # todo - validate with no parenthesis on pylint
             self._resource.Bucket(bucket).upload_file(full_path, object_key)
             _log.info('Success on uploading %s into s3', os.path.basename(full_path))
         except Exception as e:
-            _log.error('Failed uploading file [%s] into s3 with error: %s', str(e))
-            raise Exception('Failed uploading file [%s] into s3 with error: %s' % (full_path, str(e)))
+            _log.error('Failed uploading file [%s] into s3 with error: %s', object_key, str(e))
+            raise Exception('Failed uploading file [%s] into s3 with error: %s' % (full_path, str(e)))  # pylint: disable=raise-missing-from
 
     def download_from_s3(self, bucket, object_key, destination):
         """
@@ -106,13 +107,16 @@ class S3Client(object): # todo - validate with no parenthesis on pylint
         Add new key (object_key) into download_urls dictionary
         """
         self._download_urls[":".join([bucket, object_key])] = self._client.generate_presigned_url('get_object',
-                                                                         Params={'Bucket': bucket,
-                                                                                 'Key': object_key},
-                                                                         ExpiresIn=config.S3_DOWNLOAD_EXPIRATION_TIME)
+                                                                                                  Params={'Bucket': bucket,
+                                                                                                          'Key': object_key},
+                                                                                                  ExpiresIn=config.S3_DOWNLOAD_EXPIRATION_TIME)
 
     def is_file_exist(self, bucket_name, object_key):
+        """
+        Validate if some file exists on specific bucket in OS based on provided object key and bucket name
+        """
         if not self._resource.Bucket(bucket_name) in self._resource.buckets.all():
-            _log.debug('Bucket with name: [%s] not exist on s3' % bucket_name)
+            _log.debug('Bucket with name: [%s] not exist on s3', bucket_name)
             return False
 
         try:
@@ -120,9 +124,9 @@ class S3Client(object): # todo - validate with no parenthesis on pylint
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == "404":
                 return False
-            else:
-                _log.error(str(e))
-                raise e
+
+            _log.error(str(e))
+            raise e
         except Exception as e2:
             _log.error(str(e2))
             raise e2
@@ -130,5 +134,3 @@ class S3Client(object): # todo - validate with no parenthesis on pylint
         return True
         # def get_download_urls(self):
         # return self._download_urls
-
-

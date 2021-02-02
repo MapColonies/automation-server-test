@@ -1,15 +1,17 @@
-from server_automation.exporter_api import storage_utils as su
-from server_automation.exporter_api import base_requests as br
-from server_automation.utils import common
-from server_automation.utils import s3storage as s3
-from server_automation.configuration import config
-# from geopackage_tools.infra import db_conn as db
-from geopackage_tools.validators import validator as gpv
+# pylint: disable=line-too-long, invalid-name, fixme
+"""This module provide test full functionality """
 import json
 import logging
 import os
 import time
 from datetime import datetime, timedelta
+from geopackage_tools.validators import validator as gpv
+from server_automation.exporter_api import storage_utils as su
+from server_automation.exporter_api import base_requests as br
+from server_automation.utils import common
+from server_automation.utils import s3storage as s3
+from server_automation.configuration import config
+
 
 _logger = logging.getLogger("server_automation.function.executors")
 
@@ -22,6 +24,7 @@ def get_task_status(uuid):
     return res
 
 
+# pylint: disable=raise-missing-from
 def send_export_request(request_dict, request_path=None, request_name=None):
     """
     This method send export request of geopackage to trigger service
@@ -32,15 +35,15 @@ def send_export_request(request_dict, request_path=None, request_name=None):
     if request_path:
         try:
             fp = open(request_path, "r")
-            _logger.debug("Request: %s ,was loaded successfully" % os.path.basename(request_path))
+            _logger.debug("Request: %s ,was loaded successfully", os.path.basename(request_path))
             request = json.load(fp)
             fp.close()
 
         except FileNotFoundError as e:
-            _logger.error("request json file: %s not exist, please validate location" % request_path)
+            _logger.error("request json file: %s not exist, please validate location", request_path)
             raise FileNotFoundError("Failed load file %s with error: $s" % request_path, str(e))
         except Exception as e2:
-            _logger.error("Error while trying load request json file: %s" % request_path)
+            _logger.error("Error while trying load request json file: %s", request_path)
             raise Exception("Failed load file %s with error: %s" % (request_path, str(e2)))
 
     elif request_dict:
@@ -53,14 +56,15 @@ def send_export_request(request_dict, request_path=None, request_name=None):
     if request_name:
         request['fileName'] = request_name
     api_url = common.combine_url(config.EXPORT_TRIGGER_URL, config.EXPORT_GEOPACKAGE_API)
-    _logger.info('Send request: %s to export with url: %s' % (request['fileName'], api_url))
+    _logger.info('Send request: %s to export with url: %s', request['fileName'], api_url)
     resp = br.send_post_request(api_url, request)
     status_code, content = common.response_parser(resp)
-    _logger.info('Response of trigger returned with status: %d' % status_code)
+    _logger.info('Response of trigger returned with status: %d', status_code)
 
     return status_code, content
 
-#deprication
+
+# deprication
 # def send_download_request(subdir, file_name, url=config.DOWNLOAD_STORAGE_URL):
 #     """
 #     This method send download request for package that was created on shared folder on storage
@@ -75,15 +79,13 @@ def send_export_request(request_dict, request_path=None, request_name=None):
 #     return resp.status_code, resp.content
 
 
-
-
 def send_download_request(pkg_download_url):
     """
     This method send download request for package that was created on shared folder on storage
     :param pkg_download_url: download uri
     :return: status code + response content
     """
-    _logger.info('Send download request: %s' % pkg_download_url)
+    _logger.info('Send download request: %s', pkg_download_url)
     resp = br.send_get_request(pkg_download_url)
     return resp.status_code, resp.content
 
@@ -119,14 +121,14 @@ def exporter_follower(url, uuid):
         current_time = time.time()
         running = not (progress == 100 and content['status'] == config.EXPORT_STATUS_COMPLITED) and current_time < t_end
         _logger.info(
-            'Received from task(uuid): %s ,with status code: %d and progress: %d' % (uuid, status_code, progress))
+            'Received from task(uuid): %s ,with status code: %d and progress: %d', uuid, status_code, progress)
 
         if current_time > t_end:
-            "Got timeout and will stop running progress validation"
+            _logger.error("Got timeout and will stop running progress validation")
             raise Exception("got timeout while following task running")
 
     _logger.info(
-        'Finish exporter job according status index service and file should be places on: %s' % (content['fileURI']))
+        'Finish exporter job according status index service and file should be places on: %s', (content['fileURI']))
     results = {
         'taskId': content['taskId'],
         'fileName': content['fileName'],
@@ -140,9 +142,13 @@ def exporter_follower(url, uuid):
 
 
 def load_gpkg_from_storage(file_name, directory_name):
+    """
+    - This function load to memory geopackage by provided name
+    - Its support FS and OS by running configuration
+    """
     if config.S3_EXPORT_STORAGE_MODE:
         s3_conn = s3.S3Client(config.S3_END_POINT, config.S3_ACCESS_KEY, config.S3_SECRET_KEY)
-        object_key = "/".join([directory_name, ".".join([file_name,config.PACKAGE_EXT])])
+        object_key = "/".join([directory_name, ".".join([file_name, config.PACKAGE_EXT])])
 
         destination_dir = os.path.join(config.S3_DOWNLOAD_DIRECTORY, object_key.split('.')[0])
         if not os.path.exists(destination_dir):
@@ -161,6 +167,7 @@ def load_gpkg_from_storage(file_name, directory_name):
 
 
 def validate_zoom_level(uri, max_zoom_level):
+    """ check if current geopackage provide only zoom that restricted by provided zoom level value"""
     if config.S3_EXPORT_STORAGE_MODE:
         s3_conn = s3.S3Client(config.S3_END_POINT, config.S3_ACCESS_KEY, config.S3_SECRET_KEY)
         object_key = "/".join(uri.split("/")[-2:])
@@ -171,11 +178,11 @@ def validate_zoom_level(uri, max_zoom_level):
 
         s3_conn.download_from_s3(config.S3_BUCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
         uri = os.path.join(destination_dir, destination_dir.split('/')[-1])
-    else: #FS
+    else:  # FS
         if not os.path.exists(config.PACKAGE_OUTPUT_DIR):
             _logger.error(
-                "Output directory not exist [%s]- validate mapping and directory on config" % (config.PACKAGE_OUTPUT_DIR))
-            raise Exception("Output directory: [%s] not found ! validate config \ mapping" % (config.PACKAGE_OUTPUT_DIR))
+                "Output directory not exist [%s]- validate mapping and directory on config", config.PACKAGE_OUTPUT_DIR)
+            raise Exception("Output directory: [%s] not found ! validate config or mapping" % config.PACKAGE_OUTPUT_DIR)
 
     res = gpv.validate_zoom_levels(uri, max_zoom_level)
     res = set(res)
@@ -198,11 +205,11 @@ def validate_geo_package(uri):
 
         s3_conn.download_from_s3(config.S3_BUCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
         uri = os.path.join(destination_dir, destination_dir.split('/')[-1])
-    else: #FS
+    else:  # FS
         if not os.path.exists(config.PACKAGE_OUTPUT_DIR):
             _logger.error(
-                "Output directory not exist [%s]- validate mapping and directory on config" % (config.PACKAGE_OUTPUT_DIR))
-            raise Exception("Output directory: [%s] not found ! validate config \ mapping" % (config.PACKAGE_OUTPUT_DIR))
+                "Output directory not exist [%s]- validate mapping and directory on config", config.PACKAGE_OUTPUT_DIR)
+            raise Exception("Output directory: [%s] not found ! validate config | mapping" % config.PACKAGE_OUTPUT_DIR)
 
     # TODO fix after environment will be fixed
     # if not os.path.exists(uri):
@@ -214,6 +221,7 @@ def validate_geo_package(uri):
 
 
 def delete_requests(url, requests):
+    """ use storage wrapper of api to delete request by their uuid"""
     resp = su.delete_by_uuid(url, requests)
     return resp
 
@@ -224,13 +232,15 @@ def clear_all_tasks(url):
     """
     resp = ['db was empty of task']
     statuses = json.loads(su.get_all_statuses(url).text)
-    if len(statuses):
+    if statuses and len(statuses)>0:
         uuids = [stat['taskId'] for stat in statuses]
         resp = su.delete_by_uuid(url, uuids)
     return resp
 
 
-def create_testing_status(url, directory_name, fileName):
+# pylint: disable=no-else-return
+def create_testing_status(directory_name, fileName):
+    """ mock helper function that create status on storage"""
     current_time = datetime.utcnow()
     utc_curr = current_time.utcnow().strftime('%Y-%m-%d %H:%M:%SZ')
     utc_expierd = (current_time + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%SZ')
@@ -264,9 +274,9 @@ def create_testing_status(url, directory_name, fileName):
                         34.8119380171075,
                         31.9642696217735
                     ], [
-                        34.8119380171075,
-                        31.9547503375918
-                    ]
+                    34.8119380171075,
+                    31.9547503375918
+                ]
                 ]
             ]
         },
@@ -288,9 +298,10 @@ def create_testing_status(url, directory_name, fileName):
         return resp, "None"
 
 
-def is_geopackage_exist(file_url, request=None, test_name="test name N\A"):
+# pylint: disable=no-else-return
+def is_geopackage_exist(file_url, request=None):
     """
-    Validation of specific geopackge on S3\File system
+    Validation of specific geopackge on S3 or File system
     """
     if config.S3_EXPORT_STORAGE_MODE:
         _logger.info('Test running on s3 mode')
@@ -304,14 +315,14 @@ def is_geopackage_exist(file_url, request=None, test_name="test name N\A"):
         object_key = ".".join([request['fileName'], config.PACKAGE_EXT])
         object_key = "/".join([request['directoryName'], object_key])
         res = s3_conn.is_file_exist(config.S3_BUCKET_NAME, object_key)
-        pkg_url = file_url.split('?')[0] if '?' in file_url else file_url # todo - update after download link will be
+        pkg_url = file_url.split('?')[0] if '?' in file_url else file_url  # todo - update after download link will be
         return res, pkg_url
 
     else:
         _logger.info('Test running on file-system mode')
         pkg_url = common.combine_url(config.PACKAGE_OUTPUT_DIR, *(file_url.split('/')[-2:]))
         _logger.info(pkg_url)
-        res = os.path.exists(pkg_url),
+        res = os.path.exists(pkg_url)
         return res, pkg_url
 
 

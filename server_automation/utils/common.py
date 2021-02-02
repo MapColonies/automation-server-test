@@ -1,3 +1,5 @@
+# pylint: disable=line-too-long, invalid-name
+"""Common utils for data parsing and manipulation"""
 import os
 import posixpath
 import re
@@ -9,30 +11,8 @@ import uuid
 _log = logging.getLogger('server.common')
 
 
-def init_logger():
-    """Init logging mechanism for entire running"""
-    log_mode = get_environment_variable('DEBUG_LOGS', False)
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    # create console handler with a higher log level
-    #
-    # if (logger.hasHandlers()):
-    #     logger.handlers.clear()
-
-    ch = logging.StreamHandler()
-    if not log_mode:
-        ch.setLevel(logging.INFO)
-    else:
-        ch.setLevel(logging.DEBUG)
-
-    # create formatter and add it to the handlers
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
-    # add the handlers to the logger
-    logger.addHandler(ch)
-
-
 def url_validator(url):
+    """ standard validation function that check if provided string is valid url"""
     regex = re.compile(
         r'^(?:http|ftp)s?://'  # http:// or https://
         r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
@@ -50,8 +30,8 @@ def combine_url(base, *args) -> str:
     :param base : this is the base relative uri
     :param *args : sub directories of the url
     """
-    for i in range(len(args)):
-        base = posixpath.join(base, args[i])
+    for idx in enumerate(args):
+        base = posixpath.join(base, args[idx[0]])
     return base
 
 
@@ -140,8 +120,31 @@ def bytes_to_str(string):
 
     return string.decode('utf-8')
 
+
 def generate_uuid():
     """
     create uuid string with uuid python's libary
     """
     return str(uuid.uuid4())
+
+# def init_logger():
+#     """Init logging mechanism for entire running"""
+#     log_mode = get_environment_variable('DEBUG_LOGS', False)
+#     logger = logging.getLogger()
+#     logger.setLevel(logging.DEBUG)
+#     # create console handler with a higher log level
+#     #
+#     # if (logger.hasHandlers()):
+#     #     logger.handlers.clear()
+#
+#     ch = logging.StreamHandler()
+#     if not log_mode:
+#         ch.setLevel(logging.INFO)
+#     else:
+#         ch.setLevel(logging.DEBUG)
+#
+#     # create formatter and add it to the handlers
+#     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#     ch.setFormatter(formatter)
+#     # add the handlers to the logger
+#     logger.addHandler(ch)

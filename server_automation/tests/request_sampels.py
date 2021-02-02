@@ -1,13 +1,16 @@
+# pylint: disable=line-too-long, raise-missing-from, trailing-comma-tuple
+"""This module provide generation of several request json files for testing purpose"""
 import json
 import enum
 from server_automation.configuration import config
 
 
-class box_size(enum.Enum):
-    Big = 150,
-    Medium = 50,
+class BoxSize(enum.Enum):
+    """ Size of bbox """
+    Sanity = 1,
     Small = 10,
-    Sanity = 1
+    Medium = 50,
+    Big = 150
 
 
 class ZoomLevels(enum.Enum):
@@ -16,6 +19,7 @@ class ZoomLevels(enum.Enum):
     """
     default = 18
     med = 15
+
 
 _lod_req = {
     "fileName": "unknown_name",
@@ -37,7 +41,6 @@ _lod_req = {
         32.16178955078126
     ]
 }
-
 
 _et_req_1 = {
     "fileName": "r_regular",
@@ -83,7 +86,6 @@ _et_req_2 = {
     ]
 }
 
-
 _et_req_3 = {
     "fileName": "dynamic_box",
     "sizeEst": 30,
@@ -99,7 +101,7 @@ _et_req_3 = {
         }
     ],
     "bbox": [
-            ]
+    ]
 }
 
 _box_sanity_size = [35.220349, 31.778416, 35.221412, 31.779315]
@@ -107,7 +109,7 @@ _box_10_10 = [34.937897, 31.854815, 35.044155, 31.944588]
 _box_50_50 = [34.47921, 31.16345, 35.02029, 31.61596]
 _box_150_150 = [34.321289, 30.491284, 35.911560, 31.844899]
 
-request_index = {'et_req_1': _et_req_1, 'et_req_2': _et_req_2,'lod_req': _lod_req}
+request_index = {'et_req_1': _et_req_1, 'et_req_2': _et_req_2, 'lod_req': _lod_req}
 
 
 def show_requests():
@@ -147,14 +149,15 @@ def get_lod_req(size):
 
 
 def get_request_by_box_size(size):
-    if size==box_size.Big:
+    """this method generate different export request according size [big,med,small]"""
+    if size == BoxSize.Big:
         _et_req_3["bbox"] = _box_150_150
-    elif size==box_size.Medium:
+    elif size == BoxSize.Medium:
         _et_req_3["bbox"] = _box_50_50
         _et_req_3["maxZoom"] = 5
-    elif size==box_size.Small:
+    elif size == BoxSize.Small:
         _et_req_3["bbox"] = _box_10_10
-    elif size==box_size.Sanity:
+    elif size == BoxSize.Sanity:
         return json.dumps(_et_req_2)
     else:
         raise Exception("should provide valid box size parameters for request")

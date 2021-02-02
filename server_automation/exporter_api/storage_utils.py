@@ -1,6 +1,8 @@
-from . import base_requests as conn
+# pylint: disable=line-too-long
+""" This module wrapping storage request statuses API's and provide its restful API function and extension  """
 from server_automation.utils import common
 from server_automation.configuration import config
+from . import base_requests as conn
 
 
 def get_all_statuses(url):
@@ -33,27 +35,29 @@ def delete_by_uuid(url, uuid):
     return resp
 
 
-def create_testing_status(url, directory_name, fileName):
-    body = {
-        'userId': 'deletion_test',
-        'fileName': fileName.split('.')[0],
-        'directoryName': directory_name,
-        'fileURI': common.combine_url(config.DOWNLOAD_STORAGE_URL, config.DOWNLOAD_API, directory_name, fileName),
-        'progress': 100,
-        'status': config.EXPORT_STATUS_COMPLITED,
-        "geometry": {
-            "type": "Point",
-            "coordinates": [
-                125.6,
-                10.1
-            ]
-        },
-        'estimatedFileSize': 1500,
-        'realFileSize': 1500,
-        'creationTime': 222,
-
-    }
-    return body
+# pylint: disable=invalid-name
+# def create_testing_status(directory_name, fileName):
+#     """  create mocking status on db for testing usage"""
+#     body = {
+#         'userId': 'deletion_test',
+#         'fileName': fileName.split('.')[0],
+#         'directoryName': directory_name,
+#         'fileURI': common.combine_url(config.DOWNLOAD_STORAGE_URL, config.DOWNLOAD_API, directory_name, fileName),
+#         'progress': 100,
+#         'status': config.EXPORT_STATUS_COMPLITED,
+#         "geometry": {
+#             "type": "Point",
+#             "coordinates": [
+#                 125.6,
+#                 10.1
+#             ]
+#         },
+#         'estimatedFileSize': 1500,
+#         'realFileSize': 1500,
+#         'creationTime': 222,
+#
+#     }
+#     return body
 
 # def clear_all_tasks(url):
 #     """

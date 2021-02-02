@@ -1,7 +1,5 @@
-""" This module responsible of testing export tools - server side:
-
-"""
-import pytest
+# pylint: disable=line-too-long, invalid-name, broad-except
+""" This module responsible of testing export tools - server side:"""
 import json
 import logging
 from server_automation.tests import request_sampels
@@ -12,6 +10,7 @@ from conftest import ValueStorage
 
 _log = logging.getLogger('server_automation.tests.exporter_tool_tests')
 uuids = []
+
 
 ####################################### setup_tests #######################################
 
@@ -25,7 +24,7 @@ def test_export_geopackage():
         -----------------------------------------------------------------------------
         This test validates exporting geoPackage includes all tiles and their relative metadata based on best layer.
     """
-    _log.info(f'Start running test: {test_export_geopackage.__name__}')
+    _log.info('Start running test: %s', test_export_geopackage.__name__)
     # check and load request json
     request = request_sampels.get_request_sample('et_req_2')
     assert request, \
@@ -56,7 +55,7 @@ def test_export_geopackage():
 
     # check geopackage file was created on storage
     file_location = res['fileURI']
-    _log.debug(f'File uri expected: {file_location}')
+    _log.debug('File uri expected: %s', file_location)
 
     gpkg_exist, pkg_url = exc.is_geopackage_exist(file_location, request=request)
 
@@ -87,21 +86,21 @@ def test_box_size_limit():
     _log.info('Start running test: %s', test_export_geopackage.__name__)
     err = 'Unknown'
 
-    request = request_sampels.get_request_by_box_size(request_sampels.box_size.Big)
+    request = request_sampels.get_request_by_box_size(request_sampels.BoxSize.Big)
     assert request
 
     # sending requests with different bbox sizes
     s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big")
     assert config.ResponseCode.ValidationErrors.value == s_code and content[
-        'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.box_size.Medium}] test failed"
+        'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.BoxSize.Medium}] test failed"
     if config.ENVIRONMENT_NAME == 'qa':  # on QA environment the limit size can be changes and its to prevent overload
-        request = request_sampels.get_request_by_box_size(request_sampels.box_size.Medium)
+        request = request_sampels.get_request_by_box_size(request_sampels.BoxSize.Medium)
         assert request
         s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_medium')
         assert config.ResponseCode.ValidationErrors.value == s_code and content[
-            'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.box_size.Medium}] test failed"
+            'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.BoxSize.Medium}] test failed"
 
-    request = request_sampels.get_request_by_box_size(request_sampels.box_size.Sanity)
+    request = request_sampels.get_request_by_box_size(request_sampels.BoxSize.Sanity)
     assert request
     s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_small')
     try:
@@ -163,7 +162,7 @@ def test_export_on_storage():
     _log.info('Start running test: %s', test_export_on_storage.__name__)
 
     # loading request
-    request = request_sampels.get_request_by_box_size(request_sampels.box_size.Sanity)
+    request = request_sampels.get_request_by_box_size(request_sampels.BoxSize.Sanity)
     assert request, \
         f'Test: [{test_export_on_storage.__name__}] Failed: File not exist or failure on loading request json'
 
@@ -180,6 +179,7 @@ def test_export_on_storage():
     # check exporting process and wait till end with results
     res = None
     try:
+        err = "unknown"
         res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
         uuids.append(content['uuid'])
     except Exception as e:
@@ -191,7 +191,7 @@ def test_export_on_storage():
     file_location = res.get('fileURI')
     assert file_location, \
         f'Test: [{test_export_on_storage.__name__}] Failed: download link not exist | created]'
-    _log.debug(f'File uri expected: {file_location}')
+    _log.debug('File uri expected: %s',file_location)
     gpkg_exist, pkg_url = exc.is_geopackage_exist(file_location, request=request)
     assert gpkg_exist, \
         f'Test: [{test_export_on_storage.__name__}] Failed: file not exist on storage [disk | S3 ]:[{pkg_url}]'
@@ -208,9 +208,9 @@ def test_download_package():
     """
     _log.info('Start running test: %s', test_download_package.__name__)
 
-    """ Prerequisites - creating export package to test download process"""
+    # Prerequisites - creating export package to test download process
     # prepare request
-    request = request_sampels.get_request_by_box_size(request_sampels.box_size.Sanity)
+    request = request_sampels.get_request_by_box_size(request_sampels.BoxSize.Sanity)
     assert request, \
         f'Test: [{test_download_package.__name__}] Failed: File not exist or failure on loading request json'
     request = (json.loads(request))
@@ -226,6 +226,7 @@ def test_download_package():
     # check exporting process and wait till end with results
     res = None
     try:
+        err = "unknown"
         res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
         uuids.append(content['uuid'])
     except Exception as e:
@@ -238,7 +239,7 @@ def test_download_package():
     ValueStorage.file_name = request['fileName']
     ValueStorage.directory_name = request['directoryName']
 
-    """Test download actual flow"""
+    # Test download actual flow
     #  validate exported file exist on storage from previous test - test_export_on_storage
     _log.info(ValueStorage.gpkg_download_url)
     assert ValueStorage.gpkg_download_url, \
@@ -252,7 +253,8 @@ def test_download_package():
     fp_orig = common.generate_unique_fingerprint(orig_exported)
     fp_downloaded = common.generate_unique_fingerprint(downloaded_data)
     assert fp_orig == fp_downloaded, \
-        f'Test: [{test_download_package.__name__}] Failed: download geopackage is not equal to stored: [{fp_orig}] != [{fp_downloaded}])'
+        f'Test: [{test_download_package.__name__}] Failed: download geopackage is not equal to stored: [{fp_orig}]  \
+         != [{fp_downloaded}]) '
 
     _log.info('Finish running test: %s', test_download_package.__name__)
 
@@ -281,6 +283,7 @@ def test_export_by_lod():
     # check exporting process and wait till end with results
     res = None
     try:
+        err = "unknown"
         res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
         uuids.append(content['uuid'])
     except Exception as e:
@@ -290,7 +293,7 @@ def test_export_by_lod():
 
     # check geopackage file was created on storage
     file_location = res['fileURI']
-    _log.debug(f'File uri expected: {file_location}')
+    _log.debug('File uri expected: %s', file_location)
 
     gpkg_exist, pkg_url = exc.is_geopackage_exist(file_location, request=request)
 
@@ -326,7 +329,7 @@ def test_export_by_lod():
 
     # check geopackage file was created on storage
     file_location = res['fileURI']
-    _log.debug(f'File uri expected: {file_location}')
+    _log.debug('File uri expected: %s', file_location)
 
     gpkg_exist, pkg_url = exc.is_geopackage_exist(file_location, request=request)
 
@@ -339,16 +342,19 @@ def test_export_by_lod():
         f'Test: [{test_export_by_lod.__name__}] Failed: package is corrupted or wrong max zoom data[{pkg_url}]'
 
 
-def setup_module(module):
+def setup_module(module):  # pylint: disable=unused-argument
+    """
+    This method been executed before test running - env general info
+    """
     storage_type = "Object storage" if config.S3_EXPORT_STORAGE_MODE else 'File system'
-    _log.info(f'Current environment of testing:\n'
-              f'Exporter tools service test\n'
-              f'Storage mode: {storage_type}\n'
-              f'Testing environment: {config.ENVIRONMENT_NAME}\n'
-              )
+    _log.info('Current environment of testing:\n Exporter tools service test\nStorage mode: %s\nTesting environment: %s\n'
+              , storage_type, config.ENVIRONMENT_NAME)
 
 
-def teardown_module(module):
+def teardown_module(module):  # pylint: disable=unused-argument
+    """
+    This method been executed after test running - env cleaning
+    """
     # exc.clear_all_tasks(config.EXPORT_STORAGE_URL) # this function remove all statuses from storage
     exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
     print("\nenvironment was cleaned up")
@@ -361,7 +367,7 @@ def teardown_module(module):
 #     assert resp.status == web.HTTPOk.status_code
 
 # test_delete_old_packages()
-# test_export_geopackage()
+test_export_geopackage()
 # test_box_size_limit()
 # test_export_on_storage()
 # test_download_package()
