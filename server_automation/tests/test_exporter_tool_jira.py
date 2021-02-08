@@ -2,6 +2,9 @@
 """ This module responsible of testing export tools - server side:"""
 import json
 import logging
+
+import pytest
+
 from server_automation.tests import request_sampels
 from server_automation.functions import executors as exc
 from server_automation.configuration import config
@@ -16,8 +19,8 @@ uuids = []
 
 ###########################################################################################
 
-
-def test_export_geopackage():
+@pytest.mark.parametrize("issue_id", [37032])
+def test_export_geopackage(get_config, Zapi_cloud_client, test_status, issue_id, get_execution):
     """ 1. Test case: Exporting Orthophoto (raster data) as geopackage with specific layer
         -----------------------------------------------------------------------------
         Validate requirement 1+2 – server side – 1 Export API
@@ -73,7 +76,8 @@ def test_export_geopackage():
     _log.info('Finish running test: %s', test_export_geopackage.__name__)
 
 
-def test_box_size_limit():
+@pytest.mark.parametrize("issue_id", [37040])
+def test_box_size_limit(get_config, Zapi_cloud_client, test_status, issue_id, get_execution):
     """ 6. Test case: Export orthophoto according restricted region size (bbox) as geoPackage
         -----------------------------------------------------------------------------
         Validate requirement 12 – server side – 1 Export API
@@ -114,7 +118,8 @@ def test_box_size_limit():
     _log.info('Finish running test: %s', test_box_size_limit.__name__)
 
 
-def test_cleanup_gpkg():
+@pytest.mark.parametrize("issue_id", [37042])
+def test_cleanup_gpkg(get_config, Zapi_cloud_client, test_status, issue_id, get_execution):
     """
         7. Test case: Deletion of old packages after configurable time period
         -----------------------------------------------------------------------------
@@ -151,7 +156,8 @@ def test_cleanup_gpkg():
 #     pass
 
 
-def test_export_on_storage():
+@pytest.mark.parametrize("issue_id", [37051])
+def test_export_on_storage(get_config, Zapi_cloud_client, test_status, issue_id, get_execution):
     """ 8. Test case: Run export request and create geopackage on shared folder|S3
         -----------------------------------------------------------------------------
         Validate requirement 1 – server side – 1 Export API
@@ -199,7 +205,8 @@ def test_export_on_storage():
     _log.info('Finish running test: %s', test_export_on_storage.__name__)
 
 
-def test_download_package():
+@pytest.mark.parametrize("issue_id", [37058])
+def test_download_package(get_config, Zapi_cloud_client, test_status, issue_id, get_execution):
     """ 9. Test case:Download locally orthophoto geopackage from shared storage.
         -----------------------------------------------------------------------------
         Validate requirement 7+11 – server side – 1 Export API
@@ -259,7 +266,8 @@ def test_download_package():
     _log.info('Finish running test: %s', test_download_package.__name__)
 
 
-def test_export_by_lod():
+@pytest.mark.parametrize("issue_id", [37062])
+def test_export_by_lod(get_config, Zapi_cloud_client, test_status, issue_id, get_execution):
     """ 12. Test case: send export request by zoom level (LOD – level of details)
         -----------------------------------------------------------------------------
         Validate requirement 7+11 – server side – 1 Export API
