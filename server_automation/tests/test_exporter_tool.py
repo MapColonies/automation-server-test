@@ -1,4 +1,4 @@
-# pylint: disable=line-too-long, invalid-name, broad-except
+# pylint: disable=line-too-long, invalid-name, broad-except, duplicate-code
 """ This module responsible of testing export tools - server side:"""
 import json
 import logging

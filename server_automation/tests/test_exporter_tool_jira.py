@@ -1,17 +1,15 @@
-# pylint: disable=line-too-long, invalid-name, broad-except
+# pylint: disable=line-too-long, invalid-name, broad-except, unused-argument
 """ This module responsible of testing export tools - server side:"""
 import json
 import logging
-
 import pytest
-
 from server_automation.tests import request_sampels
 from server_automation.functions import executors as exc
 from server_automation.configuration import config
 from server_automation.utils import common
 from conftest import ValueStorage
 
-_log = logging.getLogger('server_automation.tests.exporter_tool_tests')
+_log = logging.getLogger('server_automation.tests.exporter_tool_tests_JIRA')
 uuids = []
 
 

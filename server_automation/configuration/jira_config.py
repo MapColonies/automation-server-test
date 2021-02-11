@@ -1,23 +1,24 @@
+# pylint: disable=invalid-name, broad-except
+""" configuration handler for jira api"""
 import json
 import os
-import sys
-root_path = sys.path[1]
+import logging
 
-FILE_URL = '/home/ronenk1/dev/automation-server-test/jira_config.json'
+_log = logging.getLogger('server_automation.configuration.jira_config')
+FILE_URL = os.environ.get('JIRA_CONF', '/home/ronenk1/dev/automation-server-test/jira_config.json')
 
 
-def jira_config_from_json(file_uri=None):
+def jira_config_from_json():
+    """ Read external config json and parse running memory"""
     file_config = None
 
     try:
-        file_uri = FILE_URL #todo - refactor
-        with open(file_uri, 'r') as f:
+        with open(FILE_URL, 'r') as f:
             file_config = json.load(f)
     except FileNotFoundError as e:
-        print(str(e))
+        _log.error(str(e))
         raise e
     except Exception as e2:
-        print(str(e2))
+        _log.error(str(e2))
 
     return file_config
-

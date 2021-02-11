@@ -3,11 +3,11 @@ from server_automation.jira_api.jira_cloud_client import Jira_Cloud_Client
 from server_automation.jira_api.zapi_cloud_client import ZAPI_cloud_client
 from server_automation.configuration import jira_config
 import pytest
-# from definitions import TEST_LOGGER_FOLDER
-# from infra.Utils import loadConfig, get_function_name_from_env, setUp_Log
-from pathlib import Path
 import logging
 import datetime
+
+_log = logging.getLogger('server_automation.conftest')
+
 
 class ValueStorage:
     gpkg_download_url = None
@@ -15,12 +15,10 @@ class ValueStorage:
     directory_name = None
 
 
-
-
 STATUS = {
-             "pass": {"id": 1},
-             "fail": {"id": 2},
-             "unexecuted": {"id": -1}
+    "pass": {"id": 1},
+    "fail": {"id": 2},
+    "unexecuted": {"id": -1}
 }
 
 
@@ -33,6 +31,7 @@ def Zapi_cloud_client(get_config):
                                                   cloud_base_url=get_config["cloud_base_url"])
 
     yield zapi_cloud_client_instace
+
 
 @pytest.fixture(scope="function", autouse=False)
 def get_execution(request, get_config, Zapi_cloud_client, issue_id):
@@ -47,24 +46,26 @@ def get_execution(request, get_config, Zapi_cloud_client, issue_id):
     yield
 
     if request.node.rep_setup.failed:
-        print('error in setUp, please check log errors and fix them before trying again')
+        _log.error('error in setUp, please check log errors and fix them before trying again')
     elif request.node.rep_setup.passed:
         if request.node.rep_call.failed:
             status = Zapi_cloud_client.update_execution(execution_id=execution_id, project_id=project_id, issue_id=issue_id,
-                                               version_id=version_id, status=STATUS["fail"], cycleId=cycleId)
-            if status != None:
-                print("TEST {} JIRA update SUCCESS".format(request.node.nodeid))
+                                                        version_id=version_id, status=STATUS["fail"], cycleId=cycleId)
+            if status is not None:
+                _log.debug("TEST {} JIRA update SUCCESS".format(request.node.nodeid))
         else:
             status = Zapi_cloud_client.update_execution(execution_id=execution_id, project_id=project_id, issue_id=issue_id,
-                                               version_id=version_id, status=STATUS["pass"], cycleId=cycleId)
-            if status != None:
-                print("TEST {} JIRA update SUCCESS".format(request.node.nodeid))
+                                                        version_id=version_id, status=STATUS["pass"], cycleId=cycleId)
+            if status is not None:
+                _log.debug("TEST {} JIRA update SUCCESS".format(request.node.nodeid))
+
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, "rep_" + rep.when, rep)
+
 
 #
 # @pytest.fixture(scope="function", autouse=False)
@@ -93,17 +94,14 @@ def get_config():
 
 @pytest.fixture(scope="function", autouse=False)
 def test_status(request):
-    print("*"*41 + 'TEST BODY' + "*"*41)
+    _log.debug("*" * 41 + 'TEST BODY' + "*" * 41)
     yield
     if request.node.rep_setup.failed:
-        print('error in setUp, please check log errors and fix them before trying again')
+        _log.error('error in setUp, please check log errors and fix them before trying again')
     elif request.node.rep_setup.passed:
         if request.node.rep_call.failed:
-            print("TEST {} FAILED".format(request.node.nodeid))
+            _log.debug("TEST {} FAILED".format(request.node.nodeid))
         else:
-            print("TEST {} PASSED".format(request.node.nodeid))
+            _log.debug("TEST {} PASSED".format(request.node.nodeid))
 
-    print("*"*39 + 'TEST_TEARDOWN' + "*"*39)
-
-
-
+    _log.debug("*" * 39 + 'TEST_TEARDOWN' + "*" * 39)

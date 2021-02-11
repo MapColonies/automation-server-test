@@ -1,3 +1,4 @@
+# pylint: disable-all
 import pytest
 
 @pytest.mark.parametrize("issue_id", [(37040)])
