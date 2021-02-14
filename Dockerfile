@@ -8,7 +8,7 @@ RUN apk update -q --no-cache \
 # upgrade setuptools_scm
 RUN pip3 install --upgrade setuptools_scm
 # create app directories
-RUN mkdir /opt/output && mkdir /opt/logs
+RUN mkdir /opt/output && mkdir /opt/logs && mkdir /opt/jira
 # setup workdir
 WORKDIR /source_code
 # env arguments for versioning
@@ -22,7 +22,7 @@ COPY . .
 # install source code as local package
 RUN pip3 install --upgrade .
 # app permissions
-RUN chmod +x start.sh && chown -R app:app /opt/output && chown -R app:app /opt/logs
+RUN chmod +x start.sh && chown -R app:app /opt/output && chown -R app:app /opt/logs && chown -R app:app /opt/jira
 
 # sets the user to run the application with: "app"
 USER app:app
