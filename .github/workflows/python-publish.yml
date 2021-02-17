@@ -25,7 +25,7 @@ jobs:
     - name: Azure Pipelines Action
       uses: Azure/pipelines@v1
       with:
-        azure-devops-project-url: https://dev.azure.com/Libot-Mipui-Org/exporter-trigger
+        azure-devops-project-url: https://dev.azure.com/Libot-Mipui-Org/automation-server-test
         azure-pipeline-name: 'build-and-push-to-ACR'
         azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
   security:
