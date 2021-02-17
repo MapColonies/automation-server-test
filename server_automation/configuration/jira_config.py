@@ -5,7 +5,7 @@ import os
 import logging
 
 _log = logging.getLogger('server_automation.configuration.jira_config')
-FILE_URL = os.environ.get('JIRA_CONF', '/home/ronenk1/dev/automation-server-test/jira_config.json')
+FILE_URL = os.environ.get('JIRA_CONF', '/opt/jira/jira_config.json')
 
 
 def jira_config_from_json():
