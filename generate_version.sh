@@ -1,7 +1,7 @@
 #!/bin/bash
 pip3 install setuptools setuptools_scm
 #VER=$(python3 setup.py --version | sed 's/+/./g')
-ACR_REGISTRY="http://acrarolibotnonprod.azurecr.io"
+ACR_REGISTRY="acrarolibotnonprod.azurecr.io"
 ACR_REPOSITORY="automation-server-test"
 VER=15
 echo $(date):automation-test:$VER
