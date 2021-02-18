@@ -11,5 +11,5 @@ echo version=$VER>>version_history.txt
 echo $version
 echo "::set-env name=TAG_NAME::$VER"
 
-docker build --no-cache --network=host -t $ACR_REGISTRY/$ECR_REPOSITORY:$VER
+docker build --no-cache --network=host -t $ACR_REGISTRY/$ACR_REPOSITORY:$VER
 docker push $ACR_REGISTRY/$ACR_REPOSITORY:$VER
