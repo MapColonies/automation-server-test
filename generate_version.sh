@@ -7,5 +7,6 @@ echo $(date):automation-test:$VER
 echo version=$VER>version.txt
 echo version=$VER>>version_history.txt
 export version=$VER
+echo $version
 echo "::set-env name=TAG_NAME::$VER"
 
