@@ -11,6 +11,7 @@ from server_automation.exporter_api import base_requests as br
 from server_automation.utils import common
 from server_automation.utils import s3storage as s3
 from server_automation.configuration import config
+import server_automation.exporter_api.trigger_api as trigger_api
 
 
 _logger = logging.getLogger("server_automation.function.executors")
@@ -55,9 +56,12 @@ def send_export_request(request_dict, request_path=None, request_name=None):
     request = json.loads(request)
     if request_name:
         request['fileName'] = request_name
-    api_url = common.combine_url(config.EXPORT_TRIGGER_URL, config.EXPORT_GEOPACKAGE_API)
-    _logger.info('Send request: %s to export with url: %s', request['fileName'], api_url)
-    resp = br.send_post_request(api_url, request)
+    # api_url = common.combine_url(config.EXPORT_TRIGGER_URL, config.EXPORT_GEOPACKAGE_API)
+    # _logger.info('Send request: %s to export with url: %s', request['fileName'], api_url)
+    _logger.info('Send request: %s to export ', request['fileName'])
+    # resp = br.send_post_request(api_url, request)
+    trigger = trigger_api.ExporterTrigger()
+    resp = trigger.post_exportGeopackage(request)
     status_code, content = common.response_parser(resp)
     _logger.info('Response of trigger returned with status: %d', status_code)
 
@@ -90,36 +94,65 @@ def send_download_request(pkg_download_url):
     return resp.status_code, resp.content
 
 
-def exporter_follower(url, uuid):
+# def exporter_follower(url, uuid):
+def exporter_follower(uuid):
     """
     This method follow and ensure specific task progress complete
     :param url: api's url
     :param uuid: task id
     """
+    trigger = trigger_api.ExporterTrigger()
     retry_completed = 0
     if not isinstance(uuid, str):
         raise Exception("uuid param type should be string (str)! ")
 
     t_end = time.time() + config.MAX_EXPORT_RUNNING_TIME
-    full_url = common.combine_url(url, config.STATUSES_API)
+    # full_url = common.combine_url(url, config.STATUSES_API)
     running = True
     while running:
-        status_code, content = common.response_parser(su.get_uuid_status(full_url, uuid))
+
+        # # status_code, content = common.response_parser(su.get_uuid_status(full_url, uuid))
+        # response_dict = trigger.get_status_by_uuid(uuid)
+        # status_code = response_dict['progress']
+        # content = response_dict['status']
+        # # status_code, content = common.response_parser(trigger.get_status_by_uuid(uuid))
+        # if config.ResponseCode.Ok.value != status_code:
+        #     raise RuntimeError("Error on request status service with error %s:%d" % (
+        #         config.ResponseCode(status_code).name, status_code))
+        #
+        # progress = content['progress']
+        # if content['status'] == config.EXPORT_STATUS_FAILED:
+        #     raise Exception("Failed on export on task %s" % uuid)
+        # if progress == 100 and not content['status'] == config.EXPORT_STATUS_COMPLITED:
+        #     time.sleep(10)
+        #     retry_completed += 1
+        #     if retry_completed > 2:
+        #         raise Exception("Error on closing task %s" % uuid)
+        #
+        # current_time = time.time()
+        # running = not (progress == 100 and content['status'] == config.EXPORT_STATUS_COMPLITED) and current_time < t_end
+        # _logger.info(
+        #     'Received from task(uuid): %s ,with status code: %d and progress: %d', uuid, status_code, progress)
+
+        # status_code, content = common.response_parser(su.get_uuid_status(full_url, uuid))
+        response_dict, status_code = trigger.get_status_by_uuid(uuid)
+        progress = response_dict['progress']
+        status = response_dict['status']
+        # status_code, content = common.response_parser(trigger.get_status_by_uuid(uuid))
         if config.ResponseCode.Ok.value != status_code:
             raise RuntimeError("Error on request status service with error %s:%d" % (
                 config.ResponseCode(status_code).name, status_code))
 
-        progress = content['progress']
-        if content['status'] == config.EXPORT_STATUS_FAILED:
+        if status == config.EXPORT_STATUS_FAILED:
             raise Exception("Failed on export on task %s" % uuid)
-        if progress == 100 and not content['status'] == config.EXPORT_STATUS_COMPLITED:
+        if progress == 100 and not status == config.EXPORT_STATUS_COMPLITED:
             time.sleep(10)
             retry_completed += 1
             if retry_completed > 2:
                 raise Exception("Error on closing task %s" % uuid)
 
         current_time = time.time()
-        running = not (progress == 100 and content['status'] == config.EXPORT_STATUS_COMPLITED) and current_time < t_end
+        running = not (progress == 100 and status == config.EXPORT_STATUS_COMPLITED) and current_time < t_end
         _logger.info(
             'Received from task(uuid): %s ,with status code: %d and progress: %d', uuid, status_code, progress)
 
@@ -128,13 +161,13 @@ def exporter_follower(url, uuid):
             raise Exception("got timeout while following task running")
 
     _logger.info(
-        'Finish exporter job according status index service and file should be places on: %s', (content['fileURI']))
+        'Finish exporter job according status index service and file should be places on: %s', (response_dict['link']))
     results = {
-        'taskId': content['taskId'],
-        'fileName': content['fileName'],
-        'directoryName': content['directoryName'],
-        'fileURI': content['fileURI'],
-        'expirationTime': content['expirationTime']
+        'taskId': response_dict['taskId'],
+        'fileName': response_dict['fileName'],
+        'directoryName': response_dict['directoryName'],
+        'fileURI': response_dict['link'],
+        'expirationTime': response_dict['expirationTime']
 
     }
 

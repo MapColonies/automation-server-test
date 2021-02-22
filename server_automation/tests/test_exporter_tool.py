@@ -2,6 +2,7 @@
 """ This module responsible of testing export tools - server side:"""
 import json
 import logging
+from datetime import datetime
 from server_automation.tests import request_sampels
 from server_automation.functions import executors as exc
 from server_automation.configuration import config
@@ -11,7 +12,7 @@ from conftest import ValueStorage
 _log = logging.getLogger('server_automation.tests.exporter_tool_tests')
 uuids = []
 
-
+Z_TIME = datetime.now().strftime('_%Y%m_%d_%H_%M_%S')
 ####################################### setup_tests #######################################
 
 ###########################################################################################
@@ -32,7 +33,7 @@ def test_export_geopackage():
 
     # sending json request and validating export process
     request = json.loads(request)
-    request['fileName'] = 'test_case_1_exporter_api'
+    request['fileName'] = 'test_case_1_exporter_api'+Z_TIME
     request = json.dumps(request)
     s_code, content = exc.send_export_request(request)
     assert s_code == config.ResponseCode.Ok.value, \
@@ -42,7 +43,8 @@ def test_export_geopackage():
     try:
         if content.get('uuid'):  # for later system cleanup
             uuids.append(content['uuid'])
-        res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+        # res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+        res = exc.exporter_follower(content['uuid'])
         error_msg = None
     except RuntimeError as e:
         res = None
@@ -90,21 +92,25 @@ def test_box_size_limit():
     assert request
 
     # sending requests with different bbox sizes
-    s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big")
+    s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big"+Z_TIME)
+    # s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big")
     assert config.ResponseCode.ValidationErrors.value == s_code and content[
         'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.BoxSize.Medium}] test failed"
     if config.ENVIRONMENT_NAME == 'qa':  # on QA environment the limit size can be changes and its to prevent overload
         request = request_sampels.get_request_by_box_size(request_sampels.BoxSize.Medium)
         assert request
-        s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_medium')
+        s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_medium" + Z_TIME)
+        # s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_medium')
         assert config.ResponseCode.ValidationErrors.value == s_code and content[
             'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.BoxSize.Medium}] test failed"
 
     request = request_sampels.get_request_by_box_size(request_sampels.BoxSize.Sanity)
     assert request
-    s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_small')
+    s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_small" + Z_TIME)
+    # s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_small')
     try:
-        res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+        res = exc.exporter_follower(content['uuid'])
+        # res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
         uuids.append(content['uuid'])
     except Exception as e:
         res = None
@@ -167,11 +173,11 @@ def test_export_on_storage():
         f'Test: [{test_export_on_storage.__name__}] Failed: File not exist or failure on loading request json'
 
     request = (json.loads(request))
-    request['fileName'] = 'test_case_8_exporter_api'
-    # request['directoryName'] = config.EXPORT_DOWNLOAD_DIR_NAME
+    request['fileName'] = 'test_case_8_exporter_api'+Z_TIME
 
     # start trigger export
     s_code, content = exc.send_export_request(json.dumps(request))
+    # s_code, content = exc.send_export_request(json.dumps(request))
 
     assert s_code == config.ResponseCode.Ok.value, \
         f'Test: [{test_export_on_storage.__name__}] Failed: Exporter trigger return status code [{s_code}]'
@@ -180,7 +186,8 @@ def test_export_on_storage():
     res = None
     try:
         err = "unknown"
-        res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+        res = exc.exporter_follower(content['uuid'])
+        # res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
         uuids.append(content['uuid'])
     except Exception as e:
         err = str(e)
@@ -191,7 +198,7 @@ def test_export_on_storage():
     file_location = res.get('fileURI')
     assert file_location, \
         f'Test: [{test_export_on_storage.__name__}] Failed: download link not exist | created]'
-    _log.debug('File uri expected: %s',file_location)
+    _log.debug('File uri expected: %s', file_location)
     gpkg_exist, pkg_url = exc.is_geopackage_exist(file_location, request=request)
     assert gpkg_exist, \
         f'Test: [{test_export_on_storage.__name__}] Failed: file not exist on storage [disk | S3 ]:[{pkg_url}]'
@@ -214,7 +221,7 @@ def test_download_package():
     assert request, \
         f'Test: [{test_download_package.__name__}] Failed: File not exist or failure on loading request json'
     request = (json.loads(request))
-    request['fileName'] = config.EXPORT_DOWNLOAD_FILE_NAME
+    request['fileName'] = config.EXPORT_DOWNLOAD_FILE_NAME+Z_TIME
     request['directoryName'] = config.EXPORT_DOWNLOAD_DIR_NAME
 
     # start trigger export
@@ -227,7 +234,8 @@ def test_download_package():
     res = None
     try:
         err = "unknown"
-        res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+        res = exc.exporter_follower(content['uuid'])
+        # res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
         uuids.append(content['uuid'])
     except Exception as e:
         err = str(e)
@@ -272,7 +280,7 @@ def test_export_by_lod():
     assert request, \
         f'Test: [{test_export_by_lod.__name__}] Failed: File not exist or failure on loading request json'
     request = (json.loads(request))
-    request['fileName'] = 'test_case_12_exporter_api_ZoomDefault'
+    request['fileName'] = 'test_case_12_exporter_api_ZoomDefault'+Z_TIME
 
     # start trigger export
     s_code, content = exc.send_export_request(json.dumps(request))
@@ -284,7 +292,8 @@ def test_export_by_lod():
     res = None
     try:
         err = "unknown"
-        res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+        res = exc.exporter_follower(content['uuid'])
+        # res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
         uuids.append(content['uuid'])
     except Exception as e:
         err = str(e)
@@ -304,12 +313,12 @@ def test_export_by_lod():
     is_valid_zoom = exc.validate_zoom_level(pkg_url, request['maxZoom'])
     assert is_valid_zoom, \
         f'Test: [{test_export_by_lod.__name__}] Failed: package is corrupted or wrong max zoom data[{pkg_url}]'
-
+    _log.info(f'success export geopackage with zoom {request["maxZoom"]}')
     request = request_sampels.get_lod_req(request_sampels.ZoomLevels.med)
     assert request, \
         f'Test: [{test_export_by_lod.__name__}] Failed: File not exist or failure on loading request json'
     request = (json.loads(request))
-    request['fileName'] = 'test_case_12_exporter_api_ZoomMed'
+    request['fileName'] = 'test_case_12_exporter_api_ZoomMed'+Z_TIME
 
     # start trigger export
     s_code, content = exc.send_export_request(json.dumps(request))
@@ -320,7 +329,7 @@ def test_export_by_lod():
     # check exporting process and wait till end with results
     res = None
     try:
-        res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])
+        res = exc.exporter_follower(content['uuid'])
         uuids.append(content['uuid'])
     except Exception as e:
         err = str(e)
@@ -340,6 +349,7 @@ def test_export_by_lod():
     is_valid_zoom = exc.validate_zoom_level(pkg_url, request['maxZoom'])
     assert is_valid_zoom, \
         f'Test: [{test_export_by_lod.__name__}] Failed: package is corrupted or wrong max zoom data[{pkg_url}]'
+    _log.info(f'success export geopackage with zoom {request["maxZoom"]}')
 
 
 def setup_module(module):  # pylint: disable=unused-argument
@@ -356,7 +366,7 @@ def teardown_module(module):  # pylint: disable=unused-argument
     This method been executed after test running - env cleaning
     """
     # exc.clear_all_tasks(config.EXPORT_STORAGE_URL) # this function remove all statuses from storage
-    exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
+    # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
     print("\nenvironment was cleaned up")
 
 # example for future implementation of async tests

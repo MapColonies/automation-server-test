@@ -36,25 +36,36 @@ BOX_LIMIT_ERROR = 'ERR_BBOX_AREA_TOO_LARGE'
 PACKAGE_EXT = 'GPKG'
 
 ######################        Environment         #########################
-EXPORTER_PORT = common.get_environment_variable('EXPORTER_PORT', "8081")
-STORAGE_PORT = common.get_environment_variable('STORAGE_PORT', "8080")
-DOWNLOAD_PORT = common.get_environment_variable('DOWNLOAD_PORT', "8082")
-BASE_SERVICES_URL = common.get_environment_variable('SERVICES_URL', "http://10.45.128.8")
+OPENSHIFT_DEPLOY = common.get_environment_variable('OPENSHIFT_DEPLOY', True)
+if not OPENSHIFT_DEPLOY:
+    EXPORTER_PORT = common.get_environment_variable('EXPORTER_PORT', "8081")
+    STORAGE_PORT = common.get_environment_variable('STORAGE_PORT', "8080")
+    DOWNLOAD_PORT = common.get_environment_variable('DOWNLOAD_PORT', "8082")
+    BASE_SERVICES_URL = common.get_environment_variable('SERVICES_URL', "http://10.45.128.8")
+    # EXPORT_GP_URL = "http://10.28.11.49:8081"
+    EXPORT_TRIGGER_URL = ':'.join([BASE_SERVICES_URL, EXPORTER_PORT])
+    EXPORT_STORAGE_URL = ':'.join([BASE_SERVICES_URL, STORAGE_PORT])
+    DOWNLOAD_STORAGE_URL = ':'.join([BASE_SERVICES_URL, DOWNLOAD_PORT])
+    EXPORT_TRIGGER_URL = common.get_environment_variable('EXPORTER_TRIGGER_API', "http://10.45.128.8")
+else:
+
+    EXPORT_TRIGGER_URL = common.get_environment_variable('EXPORTER_TRIGGER_API', "https://trigger-raster.apps.v0h0bdx6.eastus.aroapp.io")
+
+    # STORAGE_NAME_SPACE = common.get_environment_variable('STORAGE_PORT', "8080")  # TODO - not provided yet
+    # DOWNLOAD_PORT = common.get_environment_variable('DOWNLOAD_PORT', "8082")
 # BASE_SERVICES_URL = common.get_environment_variable('SERVICES_URL', "http://10.45.128.8")
 # BASE_SERVICES_URL = "http://10.28.11.49"
 ###########################################################################
 
 
-# EXPORT_GP_URL = "http://10.28.11.49:8081"
-EXPORT_TRIGGER_URL = ':'.join([BASE_SERVICES_URL, EXPORTER_PORT])
-EXPORT_STORAGE_URL = ':'.join([BASE_SERVICES_URL, STORAGE_PORT])
-DOWNLOAD_STORAGE_URL = ':'.join([BASE_SERVICES_URL, DOWNLOAD_PORT])
+
 
 ###############  API's sub urls  #############
 EXPORT_GEOPACKAGE_API = "exportGeopackage"
-STATUSES_API = "statuses"
-DELETE_API = "delete"
-DOWNLOAD_API = "downloads"
+GET_EXPORT_STATUSES_API = "exportStatus"
+STATUSES_API = "statuses"  # not in use on prod
+DELETE_API = "delete"  # not in use on prod
+DOWNLOAD_API = "downloads"  # not in use on prod
 ##############################################
 
 ############### Requests Status Indexer Service - STATUSES ###################
@@ -101,5 +112,5 @@ if S3_EXPORT_STORAGE_MODE:
 DEV_MODE = common.get_environment_variable('DEV_MODE', True)  # todo when will be qa environment should be replaced False
 
 BEST_LAYER_URL = common.get_environment_variable('BEST_LAYER',
-                                                 "http://10.28.11.95:8080/service?REQUEST=GetMap&SERVICE=WMS&LAYERS=combined_layers")
+                                                 "http://10.8.1.7:8080/service?REQUEST=GetMap&SERVICE=WMS&LAYERS=combined_layers")
 SOURCE_LAYER = common.get_environment_variable('SOURCE_LAYER', 'combined_layers')

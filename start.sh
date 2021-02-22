@@ -11,11 +11,9 @@ else
     if [ "$JIRA_FILL" = 1 ];
     then
       echo "<<<<____RUNNING WITH JIRA UPDATE____>>>>"
-      exit
       pytest /source_code/server_automation/tests/test_exporter_tool_jira.py
     else
       echo "<<<<____RUNNING WITHOUT JIRA UPDATE____>>>>"
-      exit
       pytest /source_code/server_automation/tests/test_exporter_tool.py
     fi
 fi
