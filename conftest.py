@@ -1,10 +1,12 @@
 import pytest
-from server_automation.jira_api.jira_cloud_client import Jira_Cloud_Client
-from server_automation.jira_api.zapi_cloud_client import ZAPI_cloud_client
-from server_automation.configuration import jira_config
-import pytest
 import logging
 import datetime
+from server_automation.configuration import config
+
+if config.USE_JIRA:
+    from server_automation.configuration import jira_config
+    from server_automation.jira_api.jira_cloud_client import Jira_Cloud_Client
+    from server_automation.jira_api.zapi_cloud_client import ZAPI_cloud_client
 
 _log = logging.getLogger('server_automation.conftest')
 

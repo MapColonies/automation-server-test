@@ -68,21 +68,6 @@ def send_export_request(request_dict, request_path=None, request_name=None):
     return status_code, content
 
 
-# deprication
-# def send_download_request(subdir, file_name, url=config.DOWNLOAD_STORAGE_URL):
-#     """
-#     This method send download request for package that was created on shared folder on storage
-#     :param url: shared folder uri
-#     :param subdir: relative shared folder subdir name
-#     :param file_name: geopackage file name
-#     :return: status code + response content
-#     """
-#     api_url = common.combine_url(url, config.DOWNLOAD_API, subdir, '.'.join([file_name, config.PACKAGE_EXT]))
-#     _logger.info('Send download request: %s' % api_url)
-#     resp = br.send_get_request(api_url)
-#     return resp.status_code, resp.content
-
-
 def send_download_request(pkg_download_url):
     """
     This method send download request for package that was created on shared folder on storage
@@ -201,23 +186,32 @@ def load_gpkg_from_storage(file_name, directory_name):
 
 def validate_zoom_level(uri, max_zoom_level):
     """ check if current geopackage provide only zoom that restricted by provided zoom level value"""
-    if config.S3_EXPORT_STORAGE_MODE:
-        s3_conn = s3.S3Client(config.S3_END_POINT, config.S3_ACCESS_KEY, config.S3_SECRET_KEY)
-        object_key = "/".join(uri.split("/")[-2:])
-
-        destination_dir = os.path.join(config.S3_DOWNLOAD_DIRECTORY, object_key.split('.')[0])
-        if not os.path.exists(destination_dir):
-            os.makedirs(destination_dir)
-
-        s3_conn.download_from_s3(config.S3_BUCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
-        uri = os.path.join(destination_dir, destination_dir.split('/')[-1])
-    else:  # FS
-        if not os.path.exists(config.PACKAGE_OUTPUT_DIR):
-            _logger.error(
-                "Output directory not exist [%s]- validate mapping and directory on config", config.PACKAGE_OUTPUT_DIR)
-            raise Exception("Output directory: [%s] not found ! validate config or mapping" % config.PACKAGE_OUTPUT_DIR)
-
-    res = gpv.validate_zoom_levels(uri, max_zoom_level)
+    s_code, downloaded_data = send_download_request(uri)
+    if config.ResponseCode.Ok.value != s_code:
+        raise ConnectionError('Failed on downloading data')
+    file_name = os.path.basename(uri)
+    download_local_url = common.combine_url(config.TMP_DIR, "_".join(["zoom", str(max_zoom_level)]))
+    full_location = common.combine_url(download_local_url, file_name)
+    if not os.path.exists(download_local_url):
+        os.makedirs(download_local_url)
+    with open(full_location, "wb") as f:
+        f.write(downloaded_data)
+    # if config.S3_EXPORT_STORAGE_MODE:
+    #     s3_conn = s3.S3Client(config.S3_END_POINT, config.S3_ACCESS_KEY, config.S3_SECRET_KEY)
+    #     object_key = "/".join(uri.split("/")[-2:])
+    #
+    #     destination_dir = os.path.join(config.S3_DOWNLOAD_DIRECTORY, object_key.split('.')[0])
+    #     if not os.path.exists(destination_dir):
+    #         os.makedirs(destination_dir)
+    #
+    #     s3_conn.download_from_s3(config.S3_BUCKET_NAME, object_key, os.path.join(destination_dir, destination_dir.split('/')[-1]))
+    #     uri = os.path.join(destination_dir, destination_dir.split('/')[-1])
+    # else:  # FS
+    #     if not os.path.exists(config.PACKAGE_OUTPUT_DIR):
+    #         _logger.error(
+    #             "Output directory not exist [%s]- validate mapping and directory on config", config.PACKAGE_OUTPUT_DIR)
+    #         raise Exception("Output directory: [%s] not found ! validate config or mapping" % config.PACKAGE_OUTPUT_DIR)
+    res = gpv.validate_zoom_levels(full_location, max_zoom_level)
     res = set(res)
     return max(res) <= max_zoom_level
 

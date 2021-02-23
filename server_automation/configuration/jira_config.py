@@ -3,9 +3,10 @@
 import json
 import os
 import logging
+import server_automation.configuration.config as config
 
 _log = logging.getLogger('server_automation.configuration.jira_config')
-FILE_URL = os.environ.get('JIRA_CONF', '/opt/jira/jira_config.json')
+FILE_URL = config.FILE_URL
 
 
 def jira_config_from_json():

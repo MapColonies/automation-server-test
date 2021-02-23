@@ -114,3 +114,8 @@ DEV_MODE = common.get_environment_variable('DEV_MODE', True)  # todo when will b
 BEST_LAYER_URL = common.get_environment_variable('BEST_LAYER',
                                                  "http://10.8.1.7:8080/service?REQUEST=GetMap&SERVICE=WMS&LAYERS=combined_layers")
 SOURCE_LAYER = common.get_environment_variable('SOURCE_LAYER', 'combined_layers')
+
+USE_JIRA = common.get_environment_variable('USE_JIRA', False)
+FILE_URL = common.get_environment_variable('JIRA_CONF', '/opt/jira/jira_config.json')
+
+TMP_DIR = common.get_environment_variable('TMP_DIR', '/tmp/auto-exporter')
