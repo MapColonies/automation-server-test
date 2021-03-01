@@ -388,7 +388,7 @@ def test_n_multi_workers():
             raise Exception(err)
         assert status != config.EXPORT_STATUS_PENDING and status != config.EXPORT_STATUS_FAILED, \
             f'Test: [{test_n_multi_workers.__name__}] Failed: task not executed : [{status}]'
-        time.sleep(5)
+        time.sleep(10)
 
 
 def setup_module(module):  # pylint: disable=unused-argument
