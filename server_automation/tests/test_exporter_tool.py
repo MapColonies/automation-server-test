@@ -2,6 +2,7 @@
 """ This module responsible of testing export tools - server side:"""
 import json
 import logging
+import time
 from datetime import datetime
 from server_automation.tests import request_sampels
 from server_automation.functions import executors as exc
@@ -13,6 +14,8 @@ _log = logging.getLogger('server_automation.tests.exporter_tool_tests')
 uuids = []
 
 Z_TIME = datetime.now().strftime('_%Y%m_%d_%H_%M_%S')
+
+
 ####################################### setup_tests #######################################
 
 ###########################################################################################
@@ -33,7 +36,7 @@ def test_export_geopackage():
 
     # sending json request and validating export process
     request = json.loads(request)
-    request['fileName'] = 'test_case_1_exporter_api'+Z_TIME
+    request['fileName'] = 'test_case_1_exporter_api' + Z_TIME
     request = json.dumps(request)
     s_code, content = exc.send_export_request(request)
     assert s_code == config.ResponseCode.Ok.value, \
@@ -92,7 +95,7 @@ def test_box_size_limit():
     assert request
 
     # sending requests with different bbox sizes
-    s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big"+Z_TIME)
+    s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big" + Z_TIME)
     # s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big")
     assert config.ResponseCode.ValidationErrors.value == s_code and content[
         'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.BoxSize.Medium}] test failed"
@@ -173,7 +176,7 @@ def test_export_on_storage():
         f'Test: [{test_export_on_storage.__name__}] Failed: File not exist or failure on loading request json'
 
     request = (json.loads(request))
-    request['fileName'] = 'test_case_8_exporter_api'+Z_TIME
+    request['fileName'] = 'test_case_8_exporter_api' + Z_TIME
 
     # start trigger export
     s_code, content = exc.send_export_request(json.dumps(request))
@@ -221,7 +224,7 @@ def test_download_package():
     assert request, \
         f'Test: [{test_download_package.__name__}] Failed: File not exist or failure on loading request json'
     request = (json.loads(request))
-    request['fileName'] = config.EXPORT_DOWNLOAD_FILE_NAME+Z_TIME
+    request['fileName'] = config.EXPORT_DOWNLOAD_FILE_NAME + Z_TIME
     request['directoryName'] = config.EXPORT_DOWNLOAD_DIR_NAME
 
     # start trigger export
@@ -280,7 +283,7 @@ def test_export_by_lod():
     assert request, \
         f'Test: [{test_export_by_lod.__name__}] Failed: File not exist or failure on loading request json'
     request = (json.loads(request))
-    request['fileName'] = 'test_case_12_exporter_api_ZoomDefault'+Z_TIME
+    request['fileName'] = 'test_case_12_exporter_api_ZoomDefault' + Z_TIME
 
     # start trigger export
     s_code, content = exc.send_export_request(json.dumps(request))
@@ -316,7 +319,7 @@ def test_export_by_lod():
     assert request, \
         f'Test: [{test_export_by_lod.__name__}] Failed: File not exist or failure on loading request json'
     request = (json.loads(request))
-    request['fileName'] = 'test_case_12_exporter_api_ZoomMed'+Z_TIME
+    request['fileName'] = 'test_case_12_exporter_api_ZoomMed' + Z_TIME
 
     # start trigger export
     s_code, content = exc.send_export_request(json.dumps(request))
@@ -350,6 +353,44 @@ def test_export_by_lod():
     _log.info(f'success export geopackage with zoom {request["maxZoom"]}')
 
 
+def test_n_multi_workers():
+    """ 12. Test case: validate N workers runs parallel for exporting jobs
+    """
+    _log.info('Start running test: %s', test_n_multi_workers.__name__)
+
+    # generate export requests
+    n_requests = config.RUNNING_WORKERS_NUMBER
+    requests = [request_sampels.get_long_running_request()]
+    if n_requests > 1:
+        n = n_requests - 1
+        while n > 0:
+            requests.append(request_sampels.get_lod_req(request_sampels.ZoomLevels.default))
+            n -= 1
+
+    new_req_array = list()
+    for idx, request in enumerate(requests):
+        assert request, \
+            f'Test: [{test_n_multi_workers.__name__}] Failed: File not exist or failure on loading request json'
+        request = (json.loads(request))
+        request['fileName'] = 'test_case_exporter_api_parallel_run_'+str(idx) + Z_TIME
+        new_req_array.append(request)
+
+    requests = new_req_array
+    for idx, request in enumerate(requests):
+        s_code, content = exc.send_export_request(json.dumps(request))
+        assert s_code == config.ResponseCode.Ok.value, \
+            f'Test: [{test_n_multi_workers.__name__}] Failed: Exporter trigger return status code [{s_code}]'
+        try:
+            status, progress = exc.get_single_export_state(content['uuid'])
+            uuids.append(content['uuid'])
+        except Exception as e:
+            err = str(e)
+            raise Exception(err)
+        assert status != config.EXPORT_STATUS_PENDING and status != config.EXPORT_STATUS_FAILED, \
+            f'Test: [{test_n_multi_workers.__name__}] Failed: task not executed : [{status}]'
+        time.sleep(5)
+
+
 def setup_module(module):  # pylint: disable=unused-argument
     """
     This method been executed before test running - env general info
@@ -367,6 +408,7 @@ def teardown_module(module):  # pylint: disable=unused-argument
     # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
     print("\nenvironment was cleaned up")
 
+
 # example for future implementation of async tests
 # @pytest.mark.asyncio
 # async def test_app(create_x, auth):
@@ -381,5 +423,6 @@ def teardown_module(module):  # pylint: disable=unused-argument
 # test_download_package()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
 # test_export_by_lod()
+# test_n_multi_workers()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
 # exc.create_testing_status('hghjg', 'e_tests')

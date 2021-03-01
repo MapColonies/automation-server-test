@@ -7,12 +7,11 @@ import time
 from datetime import datetime, timedelta
 from geopackage_tools.validators import validator as gpv
 from server_automation.exporter_api import storage_utils as su
-from server_automation.exporter_api import base_requests as br
 from server_automation.utils import common
+from server_automation.utils import base_requests as br
 from server_automation.utils import s3storage as s3
 from server_automation.configuration import config
 import server_automation.exporter_api.trigger_api as trigger_api
-
 
 _logger = logging.getLogger("server_automation.function.executors")
 
@@ -77,6 +76,24 @@ def send_download_request(pkg_download_url):
     _logger.info('Send download request: %s', pkg_download_url)
     resp = br.send_get_request(pkg_download_url)
     return resp.status_code, resp.content
+
+
+# todo - refactor more generic with follower method
+def get_single_export_state(uuid):
+    """
+    This method return single export task's state
+    """
+    trigger = trigger_api.ExporterTrigger()
+    response_dict, status_code = trigger.get_status_by_uuid(uuid)
+    progress = response_dict['progress']
+    status = response_dict['status']
+    if config.ResponseCode.Ok.value != status_code:
+        raise RuntimeError("Error on request status service with error %s:%d" % (
+            config.ResponseCode(status_code).name, status_code))
+
+    if status == config.EXPORT_STATUS_FAILED:
+        raise Exception("Failed on export on task %s" % uuid)
+    return status, progress
 
 
 # def exporter_follower(url, uuid):
@@ -259,7 +276,7 @@ def clear_all_tasks(url):
     """
     resp = ['db was empty of task']
     statuses = json.loads(su.get_all_statuses(url).text)
-    if statuses and len(statuses)>0:
+    if statuses and len(statuses) > 0:
         uuids = [stat['taskId'] for stat in statuses]
         resp = su.delete_by_uuid(url, uuids)
     return resp

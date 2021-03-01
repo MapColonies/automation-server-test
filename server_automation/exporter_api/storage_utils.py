@@ -1,8 +1,7 @@
 # pylint: disable=line-too-long
 """ This module wrapping storage request statuses API's and provide its restful API function and extension  """
-from server_automation.utils import common
+from server_automation.utils import common, base_requests as conn
 from server_automation.configuration import config
-from . import base_requests as conn
 
 
 def get_all_statuses(url):

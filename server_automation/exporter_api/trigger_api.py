@@ -3,11 +3,9 @@ This module implement wrapping layer to mc - raster - trigger api for exporting.
 functionality
 """
 import json
-import os
 import logging
 from server_automation.configuration import config
-from server_automation.utils import common
-from server_automation.exporter_api import base_requests as br
+from server_automation.utils import common, base_requests as br
 
 _log = logging.getLogger("server_automation.exporter_api.exporter_tool_tests")
 

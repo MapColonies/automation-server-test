@@ -21,12 +21,33 @@ class ZoomLevels(enum.Enum):
     med = 15
 
 
+_parallel_req_long_ = {
+    "fileName": "long_run",
+    "sizeEst": 2,
+    "tilesEst": 51,
+    "maxZoom": 18,
+    "directoryName": "e_tests",
+    "exportedLayers": [
+        {
+            "exportType": "raster",
+            "sourceLayer": config.SOURCE_LAYER,
+            "url": config.BEST_LAYER_URL,
+        }
+    ],
+    "bbox": [
+        34.99443115234375,
+        31.585007324218758,
+        35.04936279296875,
+        31.650925292968758
+    ]
+}
+
 _lod_req = {
     "fileName": "unknown_name",
     "sizeEst": 30,
     "tilesEst": 51,
     "maxZoom": 18,
-    "directoryName": "test_dir",
+    "directoryName": "e_tests",
     "exportedLayers": [
         {
             "exportType": "raster",
@@ -162,3 +183,10 @@ def get_request_by_box_size(size):
     else:
         raise Exception("should provide valid box size parameters for request")
     return json.dumps(_et_req_3)
+
+
+def get_long_running_request():
+    """
+    This method return 15 min estimated running request
+    """
+    return json.dumps(_parallel_req_long_)
