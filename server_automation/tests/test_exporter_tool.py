@@ -380,6 +380,7 @@ def test_n_multi_workers():
         s_code, content = exc.send_export_request(json.dumps(request))
         assert s_code == config.ResponseCode.Ok.value, \
             f'Test: [{test_n_multi_workers.__name__}] Failed: Exporter trigger return status code [{s_code}]'
+        time.sleep(10)
         try:
             status, progress = exc.get_single_export_state(content['uuid'])
             uuids.append(content['uuid'])
@@ -388,7 +389,7 @@ def test_n_multi_workers():
             raise Exception(err)
         assert status != config.EXPORT_STATUS_PENDING and status != config.EXPORT_STATUS_FAILED, \
             f'Test: [{test_n_multi_workers.__name__}] Failed: task not executed : [{status}]'
-        time.sleep(10)
+
 
 
 def setup_module(module):  # pylint: disable=unused-argument
