@@ -360,6 +360,7 @@ def test_n_multi_workers():
 
     # generate export requests
     n_requests = config.RUNNING_WORKERS_NUMBER
+    _log.info('Parallel exporting will execute %d jobs parallel', n_requests)
     requests = [request_sampels.get_long_running_request()]
     if n_requests > 1:
         n = n_requests - 1
@@ -424,6 +425,6 @@ def teardown_module(module):  # pylint: disable=unused-argument
 # test_download_package()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
 # test_export_by_lod()
-# test_n_multi_workers()
+test_n_multi_workers()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
 # exc.create_testing_status('hghjg', 'e_tests')

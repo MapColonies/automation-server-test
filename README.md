@@ -77,7 +77,7 @@ This code provide tests that validate and testing entire tools provided for Map 
 | S3_SECRET_KEY | AWS secret key | in case of S3 mode | provided from secret | 
 | S3_END_POINT | Storage procided endpoint | in case of S3 mode | provided from secret | 
 | USE_JIRA | true for updating jira's specific cycle | - | False | 
-| JIRA_CONF | Directory of configuration json | - | placed locally | 
+| JIRA_CONF | Directory of configuration json | - | placed locally | \
 
 ###Depricated variables [Not in use - will cleanup on next deploy]
 |  Variable   | Value       | Mandatory   |   Default   |
