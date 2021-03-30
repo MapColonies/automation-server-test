@@ -392,7 +392,6 @@ def test_n_multi_workers():
             f'Test: [{test_n_multi_workers.__name__}] Failed: task not executed : [{status}]'
 
 
-
 def setup_module(module):  # pylint: disable=unused-argument
     """
     This method been executed before test running - env general info
@@ -425,6 +424,6 @@ def teardown_module(module):  # pylint: disable=unused-argument
 # test_download_package()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
 # test_export_by_lod()
-test_n_multi_workers()
+# test_n_multi_workers()
 # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
 # exc.create_testing_status('hghjg', 'e_tests')

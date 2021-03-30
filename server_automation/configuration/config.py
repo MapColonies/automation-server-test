@@ -29,7 +29,7 @@ class EnvironmentTypes(enum.Enum):
 ENVIRONMENT_NAME = common.get_environment_variable('ENVIRONMENT_NAME', 'dev')
 DEV_MODE = common.get_environment_variable('DEV_MODE', True)  # todo when will be qa environment should be replaced False
 TMP_DIR = common.get_environment_variable('TMP_DIR', '/tmp/auto-exporter')
-RUNNING_WORKERS_NUMBER = common.get_environment_variable('N_WORKERS', 3)
+RUNNING_WORKERS_NUMBER = common.get_environment_variable('N_WORKERS', 2)
 #######################################################      ERROR MASSAGES     ############################################################
 BOX_LIMIT_ERROR = 'ERR_BBOX_AREA_TOO_LARGE'
 ############################################################   GENERAL   ###################################################################
