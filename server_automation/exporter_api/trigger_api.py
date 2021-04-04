@@ -5,7 +5,10 @@ functionality
 import json
 import logging
 from server_automation.configuration import config
-from server_automation.utils import common, base_requests as br
+from mc_automation_tools import common as common
+from mc_automation_tools import base_requests as br
+
+# from server_automation.utils import common, base_requests as br
 
 _log = logging.getLogger("server_automation.exporter_api.exporter_tool_tests")
 

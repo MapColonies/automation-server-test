@@ -6,7 +6,8 @@ import pytest
 from server_automation.tests import request_sampels
 from server_automation.functions import executors as exc
 from server_automation.configuration import config
-from server_automation.utils import common
+# from server_automation.utils import common
+from mc_automation_tools import common as common
 from conftest import ValueStorage
 
 _log = logging.getLogger('server_automation.tests.exporter_tool_tests_JIRA')

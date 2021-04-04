@@ -7,3 +7,4 @@ botocore
 setuptools~=50.3.2
 botocore~=1.19.43
 PyJWT
+mc-automation-tools

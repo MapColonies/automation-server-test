@@ -7,7 +7,8 @@ from datetime import datetime
 from server_automation.tests import request_sampels
 from server_automation.functions import executors as exc
 from server_automation.configuration import config
-from server_automation.utils import common
+# from server_automation.utils import common
+from mc_automation_tools import common as common
 from conftest import ValueStorage
 
 _log = logging.getLogger('server_automation.tests.exporter_tool_tests')
@@ -408,6 +409,7 @@ def teardown_module(module):  # pylint: disable=unused-argument
     # exc.clear_all_tasks(config.EXPORT_STORAGE_URL) # this function remove all statuses from storage
     # exc.delete_requests(config.EXPORT_STORAGE_URL, uuids)
     print("\nenvironment was cleaned up")
+
 
 
 # example for future implementation of async tests

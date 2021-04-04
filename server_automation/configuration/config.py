@@ -1,7 +1,7 @@
 # pylint: disable=line-too-long
 """ configuration interface """
 import enum
-from server_automation.utils import common
+from mc_automation_tools import common
 
 
 class ResponseCode(enum.Enum):
@@ -108,8 +108,8 @@ if S3_EXPORT_STORAGE_MODE:
 
 ###################################################### LAYER CONFIGURATION DATA VARIABLE ###################################################
 BEST_LAYER_URL = common.get_environment_variable('BEST_LAYER',
-                                                 "http://10.8.1.7:8080/service?REQUEST=GetMap&SERVICE=WMS&LAYERS=combined_layers")
-SOURCE_LAYER = common.get_environment_variable('SOURCE_LAYER', 'combined_layers')
+                                                 "http://map-raster.apps.v0h0bdx6.eastus.aroapp.io/service?REQUEST=GetMap&SERVICE=WMS&LAYERS=bluemarble_il")
+SOURCE_LAYER = common.get_environment_variable('SOURCE_LAYER', 'bluemarble_il')
 
 ######################################################## REPORTING RESULTS VARIABLES #######################################################
 USE_JIRA = common.get_environment_variable('USE_JIRA', False)
