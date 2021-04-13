@@ -97,21 +97,20 @@ def test_box_size_limit():
 
     # sending requests with different bbox sizes
     s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big" + Z_TIME)
-    # s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_big")
     assert config.ResponseCode.ValidationErrors.value == s_code and content[
         'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.BoxSize.Medium}] test failed"
     if config.ENVIRONMENT_NAME == 'qa':  # on QA environment the limit size can be changes and its to prevent overload
         request = request_sampels.get_request_by_box_size(request_sampels.BoxSize.Medium)
         assert request
         s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_medium" + Z_TIME)
-        # s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_medium')
         assert config.ResponseCode.ValidationErrors.value == s_code and content[
             'name'] == config.BOX_LIMIT_ERROR, f"limit box [{request_sampels.BoxSize.Medium}] test failed"
 
     request = request_sampels.get_request_by_box_size(request_sampels.BoxSize.Sanity)
+
     assert request
     s_code, content = exc.send_export_request(request, request_name="test_case_6_exporter_api_small" + Z_TIME)
-    # s_code, content = exc.send_export_request(request, request_name='test_case_6_exporter_api_small')
+    assert s_code == config.ResponseCode.Ok.value, f'Error on trigger stage [code: {s_code}], \n [message: {str(content)}]'
     try:
         res = exc.exporter_follower(content['uuid'])
         # res = exc.exporter_follower(config.EXPORT_STORAGE_URL, content['uuid'])

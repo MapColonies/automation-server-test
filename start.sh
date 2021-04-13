@@ -4,6 +4,10 @@ if [ "$CLEAN_UP" = 1 ];
 then
     echo "<<<<____CLEAN UP IN PROGRESS____>>>>"
     python /source_code/server_automation/tests/cleanup.py
+elif [ "$RUN_CI_CD" = 1 ];
+then
+    echo "<<<<____CI CD TESTING SANITY____>>>>"
+    pytest /source_code/server_automation/tests/test_ci_cd.py
 else
     echo "####____ RUNNING IN TEST MODE ____####"
     export OUTPUT_EXPORT_PATH=/opt/output

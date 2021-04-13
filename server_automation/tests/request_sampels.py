@@ -125,12 +125,33 @@ _et_req_3 = {
     ]
 }
 
+_req_ci_cd = {
+    "fileName": "sanity_deployment",
+    "sizeEst": 30,
+    "tilesEst": 10,
+    "maxZoom": 18,
+    "directoryName": "ci_cd",
+    "exportedLayers": [
+        {
+            "exportType": "raster",
+            "sourceLayer": config.SOURCE_LAYER,
+            "url": config.BEST_LAYER_URL,
+        }
+    ],
+    "bbox": [
+        34.864467174986935,
+        32.02514200985454,
+        34.865206880136384,
+        32.02579011373897
+    ]
+}
+
 _box_sanity_size = [35.220349, 31.778416, 35.221412, 31.779315]
 _box_10_10 = [34.937897, 31.854815, 35.044155, 31.944588]
 _box_50_50 = [34.47921, 31.16345, 35.02029, 31.61596]
 _box_150_150 = [34.321289, 30.491284, 35.911560, 31.844899]
 
-request_index = {'et_req_1': _et_req_1, 'et_req_2': _et_req_2, 'lod_req': _lod_req}
+request_index = {'et_req_1': _et_req_1, 'et_req_2': _et_req_2, 'lod_req': _lod_req, '_req_ci_cd': _req_ci_cd}
 
 
 def show_requests():

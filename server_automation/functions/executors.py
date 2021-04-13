@@ -259,10 +259,6 @@ def validate_geo_package(uri):
                 "Output directory not exist [%s]- validate mapping and directory on config", config.PACKAGE_OUTPUT_DIR)
             raise Exception("Output directory: [%s] not found ! validate config | mapping" % config.PACKAGE_OUTPUT_DIR)
 
-    # TODO fix after environment will be fixed
-    # if not os.path.exists(uri):
-    #     _logger.error('Package [%s] not exist! file validation failed' % (resp['fileURI'].split('/')[-1:]))
-    #     return False
 
     res = gpv.aseert_package(uri)
     return res
