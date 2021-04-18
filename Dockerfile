@@ -6,7 +6,7 @@ RUN addgroup -S app && adduser -S app -G app
 RUN apk update -q --no-cache \
     && apk add -q --no-cache python3 py3-pip
 # upgrade setuptools_scm
-RUN pip3 install --upgrade setuptools_scm
+RUN pip3 install --upgrade setuptools_scm wheel
 # create app directories
 RUN mkdir /opt/output && mkdir /opt/logs && mkdir /opt/jira
 # setup workdir
