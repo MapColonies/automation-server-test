@@ -27,25 +27,39 @@ def variabels_setter():
     config.S3_DOWNLOAD_DIRECTORY = common.get_environment_variable('S3_DOWNLOAD_DIR', '/tmp/')
 
 
+def get_status_message(s_code):
+    message = 'Unknown error'
+    if s_code == config.ResponseCode.Ok.value:
+        message = config.ResponseCode.Ok.name
+    elif s_code == config.ResponseCode.ValidationErrors.value:
+        message = config.ResponseCode.ValidationErrors.name
+    elif s_code == config.ResponseCode.StatusNotFound.value:
+        message = config.ResponseCode.StatusNotFound.name
+    elif s_code == config.ResponseCode.ServerError.value:
+        message = config.ResponseCode.ServerError.name
+    elif s_code == config.ResponseCode.DuplicatedError.value:
+        message = config.ResponseCode.DuplicatedError.name
+    return message
+
 def test_sanity_export_e2e():
     """
     This test provide End-To-End exporting process of geopackage and use all functionality to validate deployment
     environment was set properly
     """
-    variabels_setter()
+    # variabels_setter()
     _log.info('Start running test: %s', test_sanity_export_e2e.__name__)
     # check and load request json
     request = request_sampels.get_request_sample('_req_ci_cd')
     assert request, \
         f'Test: [{test_sanity_export_e2e.__name__}] Failed: File not exist or failure on loading request json'
-
     # sending json request and validating export process
     request = json.loads(request)
     request['fileName'] = 'ci_cd_test' + Z_TIME
     request = json.dumps(request)
     s_code, content = exc.send_export_request(request)
+    message = get_status_message(s_code)
     assert s_code == config.ResponseCode.Ok.value, \
-        f'Test: [{test_sanity_export_e2e.__name__}] Failed: Exporter trigger return status code [{s_code}] and content [{content}] '
+        f'Test: [{test_sanity_export_e2e.__name__}] Failed: Exporter trigger return status code [{s_code}] and content: [{message}] '
 
     # worker stage - follow exporting via storage statuses API
     try:
