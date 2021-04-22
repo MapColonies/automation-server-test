@@ -23,8 +23,8 @@ SOURCE_LAYER = common.get_environment_variable('SOURCE_LAYER', 'full_il')
 
 # machines:
 POSTGRESS_VM = common.get_environment_variable('POSTGRESS_MACHINE', 'localhost')
-
-
+KAFKA_VM = common.get_environment_variable('KAFKA_VM', 'localhost')
+KAFKA_PORT = common.get_environment_variable('KAFKA_PORT', 9092)
 # azure credential:
 AZURE_USER_NAME = common.get_environment_variable('AZURE_USER_NAME', 'user')
 AZURE_PASSWORD = common.get_environment_variable('AZURE_PASSWORD', 'password')
