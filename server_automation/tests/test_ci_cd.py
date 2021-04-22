@@ -1,30 +1,15 @@
 """This module provide basic sanity test running to test deployment of exporter services"""
 import json
 import logging
-import os
 from datetime import datetime
 
-from server_automation.configuration import config
-from mc_automation_tools import common as common
+from server_automation.configuration import config, config_dev
+from mc_automation_tools import common, s3storage, bash_utils
 from server_automation.tests import request_sampels
 from server_automation.functions import executors as exc
-
+from server_automation.functions import environment_validators
 _log = logging.getLogger('server_automation.tests.ci_cd')
 Z_TIME = datetime.now().strftime('_%Y%m_%d_%H_%M_%S')
-
-
-### Environment Variables ###
-def variabels_setter():
-    config.EXPORT_TRIGGER_URL = os.environ.get('EXPORTER_TRIGGER_API',
-                                               "https://trigger-raster.apps.v0h0bdx6.eastus.aroapp.io")
-    config.OPENSHIFT_DEPLOY = common.get_environment_variable('OPENSHIFT_DEPLOY', True)
-    config.MAX_EXPORT_RUNNING_TIME = common.get_environment_variable('MAX_EXPORT_RUNNING_TIME', 5) * 60
-    config.S3_EXPORT_STORAGE_MODE = common.get_environment_variable('S3_EXPORT_STORAGE_MODE', True)
-    config.S3_END_POINT = os.environ.get('S3_END_POINT')
-    config.S3_ACCESS_KEY = os.environ.get('S3_ACCESS_KEY')
-    config.S3_SECRET_KEY = os.environ.get('S3_SECRET_KEY')
-    config.S3_BUCKET_NAME = common.get_environment_variable('S3_BUCKET_NAME', None)
-    config.S3_DOWNLOAD_DIRECTORY = common.get_environment_variable('S3_DOWNLOAD_DIR', '/tmp/')
 
 
 def get_status_message(s_code):
@@ -39,14 +24,52 @@ def get_status_message(s_code):
         message = config.ResponseCode.ServerError.name
     elif s_code == config.ResponseCode.DuplicatedError.value:
         message = config.ResponseCode.DuplicatedError.name
+    elif s_code == config.ResponseCode.GetwayTimeOut.value:
+        message = config.ResponseCode.GetwayTimeOut.name
     return message
+
+
+def test_environment_validation():
+    """This test validate basic pre-running validation of exporter environment micro-services"""
+
+    # fields to test:
+    exporter_ui = config_dev.EXPORT_UI_URL
+    trigger_api = common.combine_url(config_dev.EXPORT_TRIGGER_URL, config.GET_EXPORT_STATUSES_API)
+    map_proxy = config_dev.MAP_PROXY_URL
+    s3_end_point = config_dev.S3_END_POINT
+    s3_access_key = config_dev.S3_ACCESS_KEY
+    s3_secret_key = config_dev.S3_SECRET_KEY
+    s3_bucket_name = config_dev.S3_BUCKET_NAME
+    postgress_vm = config_dev.POSTGRESS_VM
+
+    _log.info('Pre - Running test series that validate environment:\n'
+              'Will check :\n'
+              f'    1) Exporter ui - {exporter_ui}\n'
+              f'    2) Trigger API - {trigger_api}\n'
+              f'    3) Map_proxy - {map_proxy}\n'
+              f'    4) S3 client - End point: {s3_end_point}, Bucket: {s3_bucket_name}\n'
+              f'    5) Postgress - VM alive : address: {postgress_vm}\n'
+              f'    6) ELK - VM - kafka service')
+    ui_ok = common.check_url_exists(exporter_ui, config.HTTP_REQ_TIMEOUT)
+    trigger_ok = common.check_url_exists(trigger_api, config.HTTP_REQ_TIMEOUT)
+    map_proxy_ok = common.check_url_exists(map_proxy, config.HTTP_REQ_TIMEOUT)
+    s3_ok = s3storage.check_s3_valid(s3_end_point, s3_access_key, s3_secret_key, s3_bucket_name)
+    postgress_vm_ok = common.ping_to_ip(postgress_vm)
+    ssh_conn = bash_utils.ssh_to_machine(postgress_vm, config_dev.AZURE_USER_NAME, config_dev.AZURE_PASSWORD)
+    if ssh_conn:
+        postgress_vm_ok = environment_validators.is_postgress_alive(ssh_conn)
+
+
+
+
+    pass
+
 
 def test_sanity_export_e2e():
     """
     This test provide End-To-End exporting process of geopackage and use all functionality to validate deployment
     environment was set properly
     """
-    # variabels_setter()
     _log.info('Start running test: %s', test_sanity_export_e2e.__name__)
     # check and load request json
     request = request_sampels.get_request_sample('_req_ci_cd')
@@ -92,3 +115,4 @@ def test_sanity_export_e2e():
 
 
 # test_sanity_export_e2e()
+test_environment_validation()

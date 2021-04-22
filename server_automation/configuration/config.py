@@ -11,8 +11,9 @@ class ResponseCode(enum.Enum):
     Ok = 200  # server return ok status
     ValidationErrors = 400  # bad request
     StatusNotFound = 404  # status\es not found on db
-    ServerError = 500  # problem with error
     DuplicatedError = 409  # in case of requesting package with same name already exists
+    GetwayTimeOut = 504  # some server didn't respond
+    ServerError = 500  # problem with error
 
 
 class EnvironmentTypes(enum.Enum):
@@ -24,10 +25,11 @@ class EnvironmentTypes(enum.Enum):
     PROD = 3
 
 
-#############################################      Running global environment variables     ################################################
+####################################      Running global environment variables     #####################################
 # pylint: disable=fixme
 ENVIRONMENT_NAME = common.get_environment_variable('ENVIRONMENT_NAME', 'dev')
-DEV_MODE = common.get_environment_variable('DEV_MODE', True)  # todo when will be qa environment should be replaced False
+DEV_MODE = common.get_environment_variable('DEV_MODE',
+                                           True)  # todo when will be qa environment should be replaced False
 TMP_DIR = common.get_environment_variable('TMP_DIR', '/tmp/auto-exporter')
 RUNNING_WORKERS_NUMBER = common.get_environment_variable('N_WORKERS', 2)
 #######################################################      ERROR MASSAGES     ############################################################
@@ -45,8 +47,13 @@ if not OPENSHIFT_DEPLOY:
     EXPORT_STORAGE_URL = ':'.join([BASE_SERVICES_URL, STORAGE_PORT])
     DOWNLOAD_STORAGE_URL = ':'.join([BASE_SERVICES_URL, DOWNLOAD_PORT])
     EXPORT_TRIGGER_URL = common.get_environment_variable('EXPORTER_TRIGGER_API', "http://10.45.128.8")
+    EXPORT_UI_URL = common.get_environment_variable('EXPORT_UI_URL', 'http://ui-raster.apps.v0h0bdx6.eastus.aroapp.io/')
+
 else:
-    EXPORT_TRIGGER_URL = common.get_environment_variable('EXPORTER_TRIGGER_API', "https://trigger-raster.apps.v0h0bdx6.eastus.aroapp.io")
+    EXPORT_TRIGGER_URL = common.get_environment_variable('EXPORTER_TRIGGER_API',
+                                                         "https://trigger-raster.apps.v0h0bdx6.eastus.aroapp.io")
+    EXPORT_UI_URL = common.get_environment_variable('EXPORT_UI_URL', 'http://ui-raster.apps.v0h0bdx6.eastus.aroapp.io/')
+    MAP_PROXY_URL = common.get_environment_variable('MAP_PROXY_URL', 'http://map-raster.apps.v0h0bdx6.eastus.aroapp.io/')
 
     # STORAGE_NAME_SPACE = common.get_environment_variable('STORAGE_PORT', "8080")  # TODO - not provided yet
     # DOWNLOAD_PORT = common.get_environment_variable('DOWNLOAD_PORT', "8082")
@@ -104,7 +111,6 @@ if S3_EXPORT_STORAGE_MODE:
         raise Exception('S3_SECRET_KEY while running on S3 mode')
     elif not S3_END_POINT:
         raise Exception('S3_SECRET_KEY while running on S3 mode')
-
 
 ###################################################### LAYER CONFIGURATION DATA VARIABLE ###################################################
 BEST_LAYER_URL = common.get_environment_variable('BEST_LAYER',
