@@ -3,6 +3,8 @@ import json
 import logging
 from datetime import datetime
 
+import pytest
+
 from server_automation.configuration import config, config_dev
 from mc_automation_tools import common, s3storage, bash_utils
 from server_automation.tests import request_sampels
@@ -12,7 +14,8 @@ _log = logging.getLogger('server_automation.tests.ci_cd')
 Z_TIME = datetime.now().strftime('_%Y%m_%d_%H_%M_%S')
 
 
-def get_status_message(s_code):
+def _get_status_message(s_code):
+    """ helper method that parsing status code into string message"""
     message = 'Unknown error'
     if s_code == config.ResponseCode.Ok.value:
         message = config.ResponseCode.Ok.name
@@ -29,8 +32,34 @@ def get_status_message(s_code):
     return message
 
 
+def _analyze_system_results(results):
+    """
+    This helper method get list of results internal dict and return if test failed or not with summary log
+    return dict with keys:
+        1. state - true\false for passing test
+        2. failures - list of not passing services
+        3. pass = list of passing services
+    """
+    failed_services = []
+    running_services = []
+    state = True
+
+    for res in results:
+        if not res['url_valid']:
+            state = False
+            failed_services.append(f'Service {res["name"]} failed with details: {res}')
+        else:
+            res['content'] = 'Exists'
+            running_services.append(f'Service {res["name"]} pass with details: {res}')
+
+    results_dict = {'state': state, 'failure': failed_services, 'pass': running_services}
+    return results_dict
+
+
+@pytest.mark.dependency(name='env')
 def test_environment_validation():
     """This test validate basic pre-running validation of exporter environment micro-services"""
+    services_list = []
 
     # fields to test:
     exporter_ui = config_dev.EXPORT_UI_URL
@@ -50,11 +79,19 @@ def test_environment_validation():
               f'    3) Map_proxy - {map_proxy}\n'
               f'    4) S3 client - End point: {s3_end_point}, Bucket: {s3_bucket_name}\n'
               f'    5) Postgress - VM alive : address: {postgress_vm}\n'
-              f'    6) ELK - VM - kafka service: {kafka_vm}\n')
+              f'    6) ELK - VM - kafka service: address {kafka_vm}\n')
     ui_ok = common.check_url_exists(exporter_ui, config_dev.HTTP_REQ_TIMEOUT)
+    ui_ok['name'] = 'Exporter UI route'
+    services_list.append(ui_ok)
     trigger_ok = common.check_url_exists(trigger_api, config_dev.HTTP_REQ_TIMEOUT)
+    trigger_ok['name'] = 'Trigger route'
+    services_list.append(trigger_ok)
     map_proxy_ok = common.check_url_exists(map_proxy, config_dev.HTTP_REQ_TIMEOUT)
+    map_proxy_ok['name'] = 'Map-Proxy'
+    services_list.append(map_proxy_ok)
     s3_ok = s3storage.check_s3_valid(s3_end_point, s3_access_key, s3_secret_key, s3_bucket_name)
+    s3_ok['name'] = 'S3 - minio'
+    services_list.append(s3_ok)
     postgress_vm_ok = common.ping_to_ip(postgress_vm)
 
     if postgress_vm_ok:
@@ -62,25 +99,49 @@ def test_environment_validation():
         if ssh_conn:
             postgress_vm_ok = environment_validators.is_postgress_alive(ssh_conn)
             if postgress_vm_ok:
-                pastgress_vm_ok = {'url_valid': True, 'status_code': None, 'content': None, 'error_msg': None}
+                postgress_vm_ok = {'url_valid': True, 'status_code': None, 'content': None, 'error_msg': None}
             else:
-                pastgress_vm_ok = {'url_valid': False, 'status_code': None, 'content': None,
+                postgress_vm_ok = {'url_valid': False, 'status_code': None, 'content': None,
                                    'error_msg': 'Postgress service not running|activated'}
         else:
-            pastgress_vm_ok = {'url_valid': False, 'status_code': None, 'content': None, 'error_msg': 'Postgress vm not reachable'}
+            postgress_vm_ok = {'url_valid': False, 'status_code': None, 'content': None, 'error_msg': 'Postgress vm '
+                                                                                                      'not reachable'}
     else:
-        postgress_vm_ok = {'url_valid': False, 'status_code': None, 'content': None, 'error_msg': 'Postgress vm not reachable'}
+        postgress_vm_ok = {'url_valid': False, 'status_code': None, 'content': None, 'error_msg': 'Postgress vm not '
+                                                                                            'reachable'}
+    postgress_vm_ok['name'] = 'Postgress DB'
+    services_list.append(postgress_vm_ok)
 
     kafka_vm_ok = common.ping_to_ip(kafka_vm)
+
     if kafka_vm_ok:
-        bash_utils.listen_to_port(kafka_vm, config_dev.KAFKA_PORT)
+        kafka_vm_ok = bash_utils.listen_to_port(kafka_vm, config_dev.KAFKA_PORT)
+        if kafka_vm_ok:
+            kafka_vm_ok = {'url_valid': True, 'status_code': None, 'content': None,
+                           'error_msg': None}
+
+        else:
+            kafka_vm_ok = {'url_valid': False, 'status_code': None, 'content': None,
+                           'error_msg': f"can't reached connection to kafka port {config_dev.KAFKA_PORT}, probably service not running"}
     else:
-        {'url_valid': False, 'status_code': None, 'content': None, 'error_msg': 'kafka vm not reachable'}
+        kafka_vm_ok = {'url_valid': False, 'status_code': None, 'content': None, 'error_msg': 'kafka vm not reachable'}
+    kafka_vm_ok['name'] = 'KAFKA SERVICE'
+    services_list.append(kafka_vm_ok)
+
+    final_res = _analyze_system_results(services_list)
+    passed = "\n".join(final_res['pass'])
+    failed = "\n".join(final_res['failure'])
+    _log.info('\nEnvironment status:\n'
+              'passed:\n'
+              f'{passed}\n'
+              f'\n-------------------------------------------------------------------------------------------\n'
+              f'failed:'
+              f'\n{failed}')
+
+    assert final_res['state'], "Bad environment's prerequisites"
 
 
-    pass
-
-
+@pytest.mark.dependency(name="sanity", depends=["env"])
 def test_sanity_export_e2e():
     """
     This test provide End-To-End exporting process of geopackage and use all functionality to validate deployment
@@ -96,7 +157,7 @@ def test_sanity_export_e2e():
     request['fileName'] = 'ci_cd_test' + Z_TIME
     request = json.dumps(request)
     s_code, content = exc.send_export_request(request)
-    message = get_status_message(s_code)
+    message = _get_status_message(s_code)
     assert s_code == config.ResponseCode.Ok.value, \
         f'Test: [{test_sanity_export_e2e.__name__}] Failed: Exporter trigger return status code [{s_code}] and content: [{message}] '
 
