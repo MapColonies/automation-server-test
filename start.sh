@@ -1,5 +1,6 @@
 #!/bin/sh
 #export FILE_LOGS=1 # remove to avoid logging to file - will print only to console
+source /source_code/venv/bin/activate
 if [ "$CLEAN_UP" = 1 ];
 then
     echo "<<<<____CLEAN UP IN PROGRESS____>>>>"

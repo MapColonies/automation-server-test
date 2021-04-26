@@ -17,6 +17,8 @@ OUTPUT_DIR=/docker_images
 
 echo VERSION:$VERSION
 docker build --no-cache -t automation-test:$VERSION --build-arg VERSION=$VERSION .
+#docker build -t automation-test:$VERSION --build-arg VERSION=$VERSION .
+
 docker tag automation-test:$VERSION automation-test:latest
 
 echo automation-test:$VERSION > ./docker_images/generated_dockers.txt
