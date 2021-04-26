@@ -193,4 +193,4 @@ def test_sanity_export_e2e():
 
 
 # test_sanity_export_e2e()
-test_environment_validation()
+# test_environment_validation()
