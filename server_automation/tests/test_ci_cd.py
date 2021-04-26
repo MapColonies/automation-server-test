@@ -129,15 +129,16 @@ def test_environment_validation():
     services_list.append(kafka_vm_ok)
 
     final_res = _analyze_system_results(services_list)
-    passed = "\n".join(final_res['pass'])
-    failed = "\n".join(final_res['failure'])
-    _log.info('\nEnvironment status:\n'
-              'passed:\n'
+    passed = "--> " + "\n--> ".join(final_res['pass']) if final_res['pass'] else "\n--> ".join(final_res['pass'])
+    failed = "--> " + "\n--> ".join(final_res['failure']) if final_res['failure'] else "\n--> ".join(final_res['failure'])
+    _log.info('\n-------------------------------------------------------------------------------------------'
+              '\nEnvironment status:\n'
+              f'\npassed:[{len(final_res["pass"])}]\n'
               f'{passed}\n'
               f'\n-------------------------------------------------------------------------------------------\n'
-              f'failed:'
-              f'\n{failed}')
-
+              f'failed:[{len(final_res["failure"])}]\n'
+              f'{failed}'
+              f'\n-------------------------------------------------------------------------------------------\n')
     assert final_res['state'], "Bad environment's prerequisites"
 
 
@@ -192,4 +193,4 @@ def test_sanity_export_e2e():
 
 
 # test_sanity_export_e2e()
-# test_environment_validation()
+test_environment_validation()
