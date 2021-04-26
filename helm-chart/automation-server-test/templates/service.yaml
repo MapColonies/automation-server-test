@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "automation-server-test.fullname" . }}-app
+  {{- if .Values.app.service.annotations }}
+  annotations:
+    {{- toYaml .Values.app.service.annotations | nindent 4 }}
+  {{- end }}
+  labels:
+    app: {{ include "automation-server-test.labels.app" . }}
+    component: automation-server-test
+    chart: {{ include "automation-server-test.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.app.service.type }}
+  selector:
+    app: {{ include "automation-server-test.labels.app" . }}
+    component: automation-server-test
+    release: {{ .Release.Name }}
+  sessionAffinity: {{ .Values.app.service.sessionAffinity }}
+  {{- if .Values.app.service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml .Values.app.service.sessionAffinityConfig | nindent 4 }}
+  {{- end }}
+  ports:
+    - name: automation-server-test
+      protocol: TCP
+      port: {{ .Values.app.service.externalPort | default 8080 }}
+      {{- if and (eq .Values.app.service.type "NodePort") (.Values.app.service.nodePort.http) }}
+      nodePort: {{ .Values.app.service.nodePort.http }}
+      {{- end }}
+      targetPort: 8080
+  {{- if eq .Values.app.service.type "LoadBalancer" }}
+  {{- if .Values.app.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.app.service.loadBalancerIP | quote }}
+  {{- end }}
+  {{- if .Values.app.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml .Values.app.service.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  {{- end }}

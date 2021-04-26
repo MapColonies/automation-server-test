@@ -1,0 +1,132 @@
+###################################
+# Automation-Server-Test - Common Configs
+###################################
+
+# Values divided into global and app notation
+environment:
+  production: true
+global:
+  image: python
+  tag: 3.6-alpine3.12
+  pullPolicy: IfNotPresent
+  pullSecret: ""
+  replicas: 1
+
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  securityContext: {}
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  variables: |
+    {}
+  podAnnotations: {}
+  extraEnv: []
+  extraConfigmapMounts: []
+  extraPipPackages: []
+  extraVolumeMounts: []
+  extraVolumes: []
+  livenessProbe:
+    enabled: true
+    ## the number of seconds to wait before checking pod health
+    initialDelaySeconds: 300
+    periodSeconds: 30
+    failureThreshold: 5
+  startupProbe:
+    enabled: true
+    ## the number of seconds to wait before checking pod health
+    periodSeconds: 30
+    failureThreshold: 1
+  cleanup:
+    enabled: false
+    varName: CLEAN_UP
+
+app:
+  service:
+    annotations: {}
+    sessionAffinity: "None"
+    sessionAffinityConfig: {}
+    type: ClusterIP
+    externalPort: 8080
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    nodePort:
+      http: ""
+
+  serviceAccount:
+    ## if a Kubernetes ServiceAccount is created
+    ##
+    ## NOTE:
+    ## - if false, you must create the service account outside of this helm chart,
+    ##   with the name: `serviceAccount.name`
+    ##
+    create: true
+
+    ## the name of the ServiceAccount
+    ##
+    ## NOTE:
+    ## - by default the name is generated using the `automation-server-test.serviceAccountName` template in `_helpers.tpl`
+    ##
+    name: ""
+
+    ## annotations for the ServiceAccount
+    ##
+    ## EXAMPLE: (to use WorkloadIdentity in Google Cloud)
+    ##   annotations:
+    ##     iam.gke.io/gcp-service-account: <<GCP_SERVICE>>@<<GCP_PROJECT>>.iam.gserviceaccount.com
+    ##
+    annotations: {}
+  logs:
+    ## the airflow logs folder
+    ##
+    path: ""
+
+    ## configs for the logs PVC
+    ##
+    persistence:
+      ## if a persistent volume is mounted at `logs.path`
+      ##
+      enabled: false
+      ## the name of an existing PVC to use
+      ##
+      existingClaim: ""
+      ## sub-path under `logs.persistence.existingClaim` to use
+      ##
+      subPath: ""
+      ## the name of the StorageClass used by the PVC
+      ##
+      ## NOTE:
+      ## - if set to "", then `PersistentVolumeClaim/spec.storageClassName` is omitted
+      ## - if set to "-", then `PersistentVolumeClaim/spec.storageClassName` is set to ""
+      ##
+      storageClass: ""
+      ## the access mode of the PVC
+      ##
+      ## WARNING:
+      ## - must be: `ReadWriteMany`
+      ##
+      ## NOTE:
+      ## - different StorageClass support different access modes:
+      ##   https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+      ##
+      accessMode: ReadWriteMany
+      ## the size of PVC to request
+      ##
+      size: 1Gi
+  rbac:
+    ## if Kubernetes RBAC resources are created
+    ##
+    ## NOTE:
+    ## - these allow the service account to create/delete Pods in the airflow namespace,
+    ##   which is required for the KubernetesPodOperator() to function
+    ##
+    create: true
+
+    ## if the created RBAC Role has GET/LIST on Event resources
+    ##
+    ## NOTE:
+    ## - this is needed for KubernetesPodOperator() to use `log_events_on_failure=True`
+    ##
+    events: false
