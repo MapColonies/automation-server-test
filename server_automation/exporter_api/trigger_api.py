@@ -10,7 +10,7 @@ from mc_automation_tools import base_requests as br
 
 # from server_automation.utils import common, base_requests as br
 
-_log = logging.getLogger("server_automation.exporter_api.exporter_tool_tests")
+_log = logging.getLogger("server_automation.exporter_api.trigger_api")
 
 
 class ExporterTrigger:

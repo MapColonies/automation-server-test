@@ -104,7 +104,6 @@ def get_single_export_state(uuid):
 def exporter_follower(uuid):
     """
     This method follow and ensure specific task progress complete
-    :param url: api's url
     :param uuid: task id
     """
     trigger = trigger_api.ExporterTrigger()
