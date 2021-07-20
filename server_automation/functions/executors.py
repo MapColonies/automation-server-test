@@ -29,7 +29,7 @@ def get_task_status(uuid):
 
 
 # pylint: disable=raise-missing-from
-def send_export_request(request_dict, request_path=None, request_name=None):
+def send_export_request(request_dict, request_path=None, request_name=None ):
     """
     This method send export request of geopackage to trigger service
     :param request_dict: this is dict represent valid request
