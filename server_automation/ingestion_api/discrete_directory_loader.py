@@ -30,6 +30,6 @@ def validate_source_directory(path):
     Product_shp = sv.shp_to_geojson(os.path.join(path, config_ingestion.SHAPES_PATH, 'Product.shp'))
     Files_shp = sv.shp_to_geojson(os.path.join(path, config_ingestion.SHAPES_PATH, 'Files.shp'))
     img_path = os.path.join(path, config_ingestion.TIFF_PATH)
-    sv.generate_oversear_request(shape_metadata_shp, Product_shp, Files_shp, img_path)
+    res = sv.generate_oversear_request(shape_metadata_shp, Product_shp, Files_shp, img_path)
 
-    print("on progress")
+    return res

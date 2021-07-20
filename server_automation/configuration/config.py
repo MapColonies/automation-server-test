@@ -60,12 +60,7 @@ else:
 # BASE_SERVICES_URL = common.get_environment_variable('SERVICES_URL', "http://10.45.128.8")
 # BASE_SERVICES_URL = "http://10.28.11.49"
 
-##################################################  Ingestion API's sub urls & API's  ######################################################
-INGESTION_MANUAL_TRIGGER = 'trigger'
-INGESTION_WATCHER_STATUS = 'status'
-INGESTION_START_WATCHER = 'start'
-INGESTION_STOP_WATCHER = 'stop'
-INGESTION_AGENT_URL = common.get_environment_variable('INGESTION_AGENT_URL', 'http://localhost:80')
+
 #######################################################  Exporter API's sub urls  ##########################################################
 EXPORT_GEOPACKAGE_API = "exportGeopackage"
 GET_EXPORT_STATUSES_API = "exportStatus"
