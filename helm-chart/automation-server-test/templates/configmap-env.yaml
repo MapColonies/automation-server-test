@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "automation-server-test.fullname" . }}-env
+  labels:
+    app: {{ include "automation-server-test.labels.app" . }}
+    chart: {{ include "automation-server-test.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  ## Force UTC timezone
+  TZ: Etc/UTC
+  {{- if .Values.global.cleanup.enabled }}
+  CLEAN_UP: "false"
+  {{- else }}
+  CLEAN_UP: "true"
+  {{- end }}
+
