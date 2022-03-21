@@ -1,5 +1,5 @@
 # Base image to use
-FROM python:3.6-alpine3.12 as build
+FROM python:rc-alpine3.12 as build
 # update alpine OS and install python3 and pip3
 RUN apk update -q --no-cache \
     && apk add -q --no-cache python3 py3-pip
@@ -23,7 +23,7 @@ RUN venv/bin/pip install --upgrade .
 #RUN apk del .pynacl_deps build-base python3-dev libffi-dev cargo openssl-dev gcc musl-dev
 
 # final app docker
-FROM python:3.6-alpine3.12
+FROM python:rc-alpine3.12
 # setup workdir
 WORKDIR /source_code
 COPY --from=0 /source_code .
